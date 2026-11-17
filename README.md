@@ -93,6 +93,27 @@
 - Capacitor
 - React
 
+## Improvements & User Requests
+
+Inside the app, open **Improvements** to report a problem you faced and what you
+need. Submissions are filed as public issues labelled `user-request`, and a
+workflow copies each one into [`user-requests/`](user-requests/) so the request
+list is versioned in this repository.
+
+Request board: https://github.com/jiteshoffice1234-star/BENTO-2.0/issues?q=label%3Auser-request
+
+## Android APK
+
+The latest build is committed at [`builds/bento-2.0-android-debug.apk`](builds/bento-2.0-android-debug.apk).
+
+To rebuild it yourself:
+
+```bash
+npm run build
+npx cap sync android
+cd android && ./gradlew assembleDebug
+```
+
 ## Getting Started
 
 ```bash

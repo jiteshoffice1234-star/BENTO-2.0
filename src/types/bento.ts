@@ -3,7 +3,7 @@ export type TimeFormat = '12h' | '24h';
 export type StartOfWeek = 'monday' | 'sunday';
 export type AccentChoice = 'emerald' | 'violet' | 'champagne' | 'sky' | 'rose';
 
-export type NavSection = 'home' | 'money' | 'daily' | 'goals' | 'life' | 'more';
+export type NavSection = 'home' | 'money' | 'daily' | 'goals' | 'life' | 'improvements' | 'more';
 
 export type AccountType = 'savings' | 'current' | 'cash' | 'wallet' | 'credit_card' | 'custom';
 export type TransactionType = 'income' | 'expense' | 'transfer' | 'refund' | 'adjustment';

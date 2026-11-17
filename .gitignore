@@ -6,3 +6,15 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Android / Capacitor build output
+.gradle/
+local.properties
+android/app/src/main/assets/public/
+*.apk.bak
+
+# Local QA artifacts
+artifacts/
+
+# PWA dev build output
+dev-dist/

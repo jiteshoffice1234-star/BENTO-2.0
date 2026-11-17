@@ -1,0 +1,73 @@
+name: File user requests in repo
+
+# Every improvement request submitted from the app is opened as a public issue
+# labelled `user-request`. This workflow mirrors that issue into a markdown file
+# under user-requests/ so the request list lives inside the repository itself.
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  archive-request:
+    if: startsWith(github.event.issue.title, '[Improvement]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Write request file
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          ISSUE_CREATED: ${{ github.event.issue.created_at }}
+        run: |
+          mkdir -p user-requests
+          slug=$(printf '%s' "$ISSUE_TITLE" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed 's/\[improvement\]//g' \
+            | tr -cs 'a-z0-9' '-' \
+            | sed 's/^-*//; s/-*$//' \
+            | cut -c1-60)
+          [ -z "$slug" ] && slug="request"
+          file="user-requests/${ISSUE_NUMBER}-${slug}.md"
+          {
+            echo "# ${ISSUE_TITLE}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Issue | [#${ISSUE_NUMBER}](${ISSUE_URL}) |"
+            echo "| Submitted by | @${ISSUE_AUTHOR} |"
+            echo "| Created | ${ISSUE_CREATED} |"
+            echo
+            echo "## Request"
+            echo
+            printf '%s\n' "$ISSUE_BODY"
+          } > "$file"
+          echo "REQUEST_FILE=$file" >> "$GITHUB_ENV"
+
+      - name: Commit request file
+        run: |
+          git config user.name "bento-requests-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add "$REQUEST_FILE"
+          git commit -m "chore(user-requests): record request #${{ github.event.issue.number }}"
+          git push
+
+      - name: Comment link on the issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `Recorded in the repo at \`${process.env.REQUEST_FILE}\`.`,
+            });

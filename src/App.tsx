@@ -4,6 +4,7 @@ import {
   Heart,
   Home,
   LayoutGrid,
+  Lightbulb,
   Plus,
   Search,
   Sparkles,
@@ -25,6 +26,7 @@ import { DailyPage } from './pages/DailyPage';
 import { GoalsPage } from './pages/GoalsPage';
 import { LifePage } from './pages/LifePage';
 import { MorePage } from './pages/MorePage';
+import { ImprovementsPage } from './pages/ImprovementsPage';
 
 const PRIMARY_NAV: Array<{ id: NavSection; label: string; icon: React.ComponentType<{ className?: string }> }> = [
   { id: 'home', label: 'Home', icon: Home },
@@ -32,6 +34,7 @@ const PRIMARY_NAV: Array<{ id: NavSection; label: string; icon: React.ComponentT
   { id: 'daily', label: 'Daily', icon: CalendarCheck },
   { id: 'goals', label: 'Goals', icon: Target },
   { id: 'life', label: 'Life', icon: Heart },
+  { id: 'improvements', label: 'Improve', icon: Lightbulb },
   { id: 'more', label: 'More', icon: LayoutGrid },
 ];
 
@@ -236,11 +239,12 @@ export default function App() {
         {store.activeSection === 'daily' && <DailyPage />}
         {store.activeSection === 'goals' && <GoalsPage />}
         {store.activeSection === 'life' && <LifePage />}
+        {store.activeSection === 'improvements' && <ImprovementsPage />}
         {store.activeSection === 'more' && <MorePage />}
       </main>
 
       {/* Mobile Bottom Thumb-Zone Navigation (56px) */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 h-14 bg-[var(--bg-surface)]/95 backdrop-blur-md border-t bento-divider grid grid-cols-6 items-center">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 h-14 bg-[var(--bg-surface)]/95 backdrop-blur-md border-t bento-divider grid grid-cols-7 items-center">
         {PRIMARY_NAV.map((item) => {
           const Icon = item.icon;
           const active = store.activeSection === item.id;

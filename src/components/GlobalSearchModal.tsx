@@ -270,8 +270,8 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
 
               <div>
                 <p className="text-xs font-medium text-[var(--text-muted)] mb-2">Jump to Workspace</p>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                  {(['home', 'money', 'daily', 'goals', 'life', 'more'] as NavSection[]).map((sec) => (
+                <div className="grid grid-cols-3 sm:grid-cols-7 gap-2">
+                  {(['home', 'money', 'daily', 'goals', 'life', 'improvements', 'more'] as NavSection[]).map((sec) => (
                     <button
                       key={sec}
                       type="button"
