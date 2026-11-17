@@ -2,17 +2,90 @@
 
 ![Bento Logo](https://raw.githubusercontent.com/jiteshoffice1234-star/bento-app/main/src/assets/icon.png)
 
-## Overview
+## 🎨 Official Logo Specification
 
-**Bento** is an all-in-one personal productivity application built with **TypeScript** and **Capacitor**. Manage your tasks, goals, habits, finances, and calendar all in one place.
+```json
+{
+  "app_name": "BENTO",
+  "version": "2.0",
+  "tagline": "YOUR LIFE. ONE PLACE.",
+  "icon": {
+    "style": "premium_3d_luxury",
+    "format": "PNG",
+    "dimensions": "1024x1024",
+    "shape": "rounded_square",
+    "background": {
+      "type": "dark_gradient",
+      "colors": ["#031315", "#071C20", "#020809"]
+    },
+    "border": {
+      "enabled": true,
+      "style": "thin_metallic_gold",
+      "color": "#D6B56D"
+    },
+    "symbol": {
+      "type": "segmented_letter_B",
+      "style": "3d_glossy_beveled",
+      "segments": [
+        {
+          "name": "Finance",
+          "color": "#00BFA5",
+          "symbol": "rupee"
+        },
+        {
+          "name": "Daily",
+          "color": "#F5A623",
+          "symbol": "check_circle"
+        },
+        {
+          "name": "Calendar",
+          "color": "#6550A4",
+          "symbol": "calendar"
+        },
+        {
+          "name": "Goals",
+          "color": "#E94D78",
+          "symbol": "target"
+        },
+        {
+          "name": "Analytics",
+          "color": "#087E9B",
+          "symbol": "bar_chart"
+        }
+      ]
+    },
+    "typography": {
+      "name": "BENTO",
+      "style": "bold_geometric",
+      "color": "#F4E5C0",
+      "version_text": "2.0",
+      "version_color": "#00D9B0"
+    },
+    "effects": [
+      "soft_neon_glow",
+      "metallic_gold_edges",
+      "ambient_shadows",
+      "subtle_highlights",
+      "depth_and_dimension"
+    ],
+    "android": {
+      "adaptive_icon": true,
+      "foreground_layer": true,
+      "background_layer": true,
+      "monochrome_icon": true,
+      "safe_zone": true
+    }
+  }
+}
+```
 
 ## Features
 
-- **Task Management**: Create, organize, and track your daily tasks
-- **Goal Setting**: Set and monitor progress toward your goals
-- **Habit Tracking**: Build and maintain positive habits
-- **Finance Tracking**: Monitor your expenses and budget
-- **Calendar Integration**: Stay synced with your schedule
+- Task Management
+- Goal Setting
+- Habit Tracking
+- Finance Tracking
+- Calendar Integration
 
 ## Built With
 
@@ -23,25 +96,15 @@
 ## Getting Started
 
 ```bash
-# Installation
 npm install
-
-# Development
 npm run dev
-
-# Build
 npm run build
 ```
 
 ## License
 
-MIT License - see the [LICENSE](LICENSE) file for details.
+MIT
 
 ## Contact
 
 Jitesh Solanki - jiteshsolankiai@gmail.com
-
-## Related Repos
-- [bento-app](https://github.com/jiteshoffice1234-star/bento-app) - The main Bento application
-- [BOOK](https://github.com/jiteshoffice1234-star/BOOK) - Automation documentation
-- [VYRA](https://github.com/jiteshoffice1234-star/VYRA) - Offline productivity app
