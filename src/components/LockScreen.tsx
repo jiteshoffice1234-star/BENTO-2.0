@@ -29,7 +29,7 @@ export const LockScreen: React.FC = () => {
         className="bento-surface w-full max-w-sm rounded-2xl p-6 text-center space-y-5"
       >
         <div className="w-12 h-12 rounded-2xl bg-[var(--bg-elevated)] border bento-divider flex items-center justify-center mx-auto">
-          <Lock className="w-5 h-5 text-emerald-500" />
+          <Lock className="w-5 h-5 text-accent" />
         </div>
         <div>
           <h2 className="text-lg font-bold">BENTO Locked</h2>
@@ -47,12 +47,12 @@ export const LockScreen: React.FC = () => {
             setError('');
           }}
           placeholder="Enter PIN"
-          className="w-full text-center tracking-[0.4em] font-mono-num text-lg rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-4 py-3 focus:outline-none focus:border-emerald-500"
+          className="w-full text-center tracking-[0.4em] font-mono-num text-lg rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-4 py-3 focus:outline-none focus:border-accent"
         />
         {error && <p className="text-xs text-rose-500">{error}</p>}
         <button
           type="submit"
-          className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-accent text-sm font-semibold transition-colors"
         >
           <Unlock className="w-4 h-4" />
           Unlock

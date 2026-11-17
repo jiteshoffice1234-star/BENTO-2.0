@@ -22,8 +22,11 @@ import {
   AccountType,
   BudgetPeriod,
   DebtKind,
+  FinanceAccount,
+  FinanceBudget,
   FinanceTransaction,
   InvestmentAssetType,
+  RecurrencePattern,
   TransactionType,
 } from '../types/bento';
 import {
@@ -63,6 +66,8 @@ export const MoneyPage: React.FC = () => {
   // Filters for transactions
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | TransactionType>('all');
+  const [catFilter, setCatFilter] = useState<string>('all');
+  const [accFilter, setAccFilter] = useState<string>('all');
   const [rangeFilter, setRangeFilter] = useState<'month' | 'week' | 'all' | 'custom'>('month');
   const [customStart, setCustomStart] = useState(getMonthBounds(new Date().getFullYear(), new Date().getMonth()).start);
   const [customEnd, setCustomEnd] = useState(todayISO());
@@ -82,43 +87,53 @@ export const MoneyPage: React.FC = () => {
   const [txTime, setTxTime] = useState('12:00');
   const [txMerchant, setTxMerchant] = useState('');
   const [txDescription, setTxDescription] = useState('');
+  const [txTags, setTxTags] = useState('');
   const [txNotes, setTxNotes] = useState('');
+  const [txRecurring, setTxRecurring] = useState(false);
+  const [txRecurrence, setTxRecurrence] = useState<RecurrencePattern>('monthly');
 
-  // Account Form
+  // Account Form (supports Add & Edit)
+  const [editingAcc, setEditingAcc] = useState<FinanceAccount | null>(null);
   const [accName, setAccName] = useState('');
   const [accInst, setAccInst] = useState('');
   const [accType, setAccType] = useState<AccountType>('savings');
   const [accOpenBal, setAccOpenBal] = useState('');
   const [accColor, setAccColor] = useState<string>(BENTO_PALETTE[0]);
 
-  // Budget Form
+  // Budget Form (supports Add & Edit)
+  const [editingBudget, setEditingBudget] = useState<FinanceBudget | null>(null);
   const [budName, setBudName] = useState('');
   const [budCat, setBudCat] = useState('Food');
   const [budLimit, setBudLimit] = useState('');
   const [budPeriod, setBudPeriod] = useState<BudgetPeriod>('monthly');
+  const [budStart, setBudStart] = useState(todayISO());
+  const [budEnd, setBudEnd] = useState(todayISO());
   const [budWarnPct, setBudWarnPct] = useState('80');
 
-  // Savings Form
+  // Savings Form + Custom Deposit
   const [savName, setSavName] = useState('');
   const [savTarget, setSavTarget] = useState('');
   const [savCurrent, setSavCurrent] = useState('');
   const [savMonthly, setSavMonthly] = useState('');
   const [savEmergency, setSavEmergency] = useState(false);
+  const [savDepositById, setSavDepositById] = useState<Record<string, string>>({});
 
-  // Investment Form
+  // Investment Form + Manual Valuation Update
   const [invName, setInvName] = useState('');
   const [invType, setInvType] = useState<InvestmentAssetType>('mutual_funds');
   const [invInvested, setInvInvested] = useState('');
   const [invCurrent, setInvCurrent] = useState('');
   const [invQty, setInvQty] = useState('');
   const [invDate, setInvDate] = useState(todayISO());
+  const [invValEditById, setInvValEditById] = useState<Record<string, string>>({});
 
-  // Debt Form
+  // Debt Form + Custom Repayment
   const [debtTitle, setDebtTitle] = useState('');
   const [debtKind, setDebtKind] = useState<DebtKind>('loan');
   const [debtCounterparty, setDebtCounterparty] = useState('');
   const [debtPrincipal, setDebtPrincipal] = useState('');
   const [debtDue, setDebtDue] = useState(todayISO());
+  const [debtPayById, setDebtPayById] = useState<Record<string, string>>({});
 
   // Bill Form
   const [billName, setBillName] = useState('');
@@ -127,6 +142,7 @@ export const MoneyPage: React.FC = () => {
   const [billFreq, setBillFreq] = useState<'weekly' | 'monthly' | 'quarterly' | 'yearly'>('monthly');
   const [billNextDue, setBillNextDue] = useState(todayISO());
   const [billCat, setBillCat] = useState('Subscriptions');
+  const [billAccountId, setBillAccountId] = useState('');
 
   // Category Form
   const [catName, setCatName] = useState('');
@@ -175,6 +191,8 @@ export const MoneyPage: React.FC = () => {
     else if (rangeFilter === 'custom') base = filterTransactionsByDateRange(base, customStart, customEnd);
 
     if (typeFilter !== 'all') base = base.filter((t) => t.type === typeFilter);
+    if (catFilter !== 'all') base = base.filter((t) => t.category === catFilter);
+    if (accFilter !== 'all') base = base.filter((t) => t.accountId === accFilter || t.toAccountId === accFilter);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       base = base.filter(
@@ -182,11 +200,12 @@ export const MoneyPage: React.FC = () => {
           t.description.toLowerCase().includes(q) ||
           t.category.toLowerCase().includes(q) ||
           t.merchant.toLowerCase().includes(q) ||
-          t.notes.toLowerCase().includes(q)
+          t.notes.toLowerCase().includes(q) ||
+          t.tags.some((tag) => tag.toLowerCase().includes(q))
       );
     }
     return base.sort((a, b) => b.date.localeCompare(a.date));
-  }, [store.transactions, rangeFilter, customStart, customEnd, typeFilter, search, monthBounds, weekBounds]);
+  }, [store.transactions, rangeFilter, customStart, customEnd, typeFilter, catFilter, accFilter, search, monthBounds, weekBounds]);
 
   const openNewTxModal = (presetType: TransactionType = 'expense') => {
     setEditingTx(null);
@@ -200,7 +219,10 @@ export const MoneyPage: React.FC = () => {
     setTxTime('12:00');
     setTxMerchant('');
     setTxDescription('');
+    setTxTags('');
     setTxNotes('');
+    setTxRecurring(false);
+    setTxRecurrence('monthly');
     setTxModalOpen(true);
   };
 
@@ -216,7 +238,10 @@ export const MoneyPage: React.FC = () => {
     setTxTime(tx.time);
     setTxMerchant(tx.merchant);
     setTxDescription(tx.description);
+    setTxTags(tx.tags.join(', '));
     setTxNotes(tx.notes);
+    setTxRecurring(tx.recurring);
+    setTxRecurrence(tx.recurrence);
     setTxModalOpen(true);
   };
 
@@ -245,17 +270,20 @@ export const MoneyPage: React.FC = () => {
       type: txType,
       amountMinor: minor,
       category: txType === 'transfer' ? 'Transfer' : txCategory,
-      subcategory: txSubcategory,
+      subcategory: txSubcategory.trim(),
       accountId: primaryAcc,
       toAccountId: txType === 'transfer' ? txToAccountId : null,
       date: txDate,
       time: txTime,
-      merchant: txMerchant,
-      description: txDescription || txCategory,
-      tags: [],
-      notes: txNotes,
-      recurring: false,
-      recurrence: 'none' as const,
+      merchant: txMerchant.trim(),
+      description: txDescription.trim() || txCategory,
+      tags: txTags
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      notes: txNotes.trim(),
+      recurring: txRecurring,
+      recurrence: txRecurring ? txRecurrence : ('none' as const),
     };
 
     if (editingTx) store.updateTransaction(editingTx.id, payload);
@@ -354,7 +382,7 @@ export const MoneyPage: React.FC = () => {
           <button
             type="button"
             onClick={() => openNewTxModal('expense')}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent text-xs font-semibold whitespace-nowrap shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Transaction</span>
@@ -362,7 +390,6 @@ export const MoneyPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Sub-navigation Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto bento-scroll pb-1">
         {TABS.map((t) => (
           <button
@@ -371,7 +398,7 @@ export const MoneyPage: React.FC = () => {
             onClick={() => setTab(t.id)}
             className={`px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-colors ${
               tab === t.id
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-accent'
                 : 'bg-[var(--bg-surface)] border border-[var(--border-hairline)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -424,11 +451,9 @@ export const MoneyPage: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             <div className="bento-surface rounded-2xl p-5 lg:col-span-7">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-base font-bold">6-Month Income vs Expenses</h2>
-                  <p className="text-xs text-[var(--text-secondary)]">Computed directly from stored transactions</p>
-                </div>
+              <div className="mb-4">
+                <h2 className="text-base font-bold">6-Month Income vs Expenses</h2>
+                <p className="text-xs text-[var(--text-secondary)]">Computed directly from stored transactions</p>
               </div>
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -437,8 +462,10 @@ export const MoneyPage: React.FC = () => {
                     <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#94a3b8' }} />
                     <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} />
                     <Tooltip
+                      formatter={(value) => formatMoney(toMinor(Number(value)), cur)}
                       contentStyle={{
-                        backgroundColor: 'var(--bg-elevated)',
+                        backgroundColor: 'var(--bg-surface)',
+                        color: 'var(--text-primary)',
                         border: '1px solid var(--border-hairline)',
                         borderRadius: 12,
                         fontSize: 12,
@@ -471,7 +498,7 @@ export const MoneyPage: React.FC = () => {
                         </span>
                       </div>
                       <div className="h-1.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
-                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${item.percent}%` }} />
+                        <div className="h-full bg-accent rounded-full" style={{ width: `${item.percent}%` }} />
                       </div>
                     </div>
                   ))}
@@ -496,7 +523,7 @@ export const MoneyPage: React.FC = () => {
                 {store.accounts.map((acc) => {
                   const bal = balances[acc.id] ?? acc.openingBalanceMinor;
                   return (
-                    <div key={acc.id} className="py-3 flex items-center justify-between gap-3">
+                    <div key={acc.id} className="py-3 flex flex-wrap items-center justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: acc.color }} />
@@ -506,12 +533,37 @@ export const MoneyPage: React.FC = () => {
                           {acc.type.replace('_', ' ')} {acc.institution ? `· ${acc.institution}` : ''} · {acc.active ? 'Active' : 'Inactive'}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-sm font-bold font-mono-num">{formatMoney(bal, acc.currency)}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-sm font-bold font-mono-num mr-1">{formatMoney(bal, acc.currency)}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAccFilter(acc.id);
+                            setTab('transactions');
+                          }}
+                          className="text-xs text-accent hover:underline px-2 py-1"
+                        >
+                          Ledger
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingAcc(acc);
+                            setAccName(acc.name);
+                            setAccInst(acc.institution);
+                            setAccType(acc.type);
+                            setAccOpenBal(String(fromMinor(acc.openingBalanceMinor)));
+                            setAccColor(acc.color);
+                          }}
+                          aria-label="Edit account"
+                          className="p-1.5 rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           type="button"
                           onClick={() => store.updateAccount(acc.id, { active: !acc.active })}
-                          className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                          className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-2 py-1"
                         >
                           {acc.active ? 'Pause' : 'Activate'}
                         </button>
@@ -535,25 +587,53 @@ export const MoneyPage: React.FC = () => {
             onSubmit={(e) => {
               e.preventDefault();
               if (!accName.trim()) return;
-              store.addAccount({
-                name: accName.trim(),
-                institution: accInst.trim(),
-                type: accType,
-                openingBalanceMinor: toMinor(accOpenBal),
-                currency: cur,
-                color: accColor,
-                notes: '',
-                active: true,
-              });
+              if (editingAcc) {
+                store.updateAccount(editingAcc.id, {
+                  name: accName.trim(),
+                  institution: accInst.trim(),
+                  type: accType,
+                  openingBalanceMinor: toMinor(accOpenBal),
+                  color: accColor,
+                });
+                setEditingAcc(null);
+              } else {
+                store.addAccount({
+                  name: accName.trim(),
+                  institution: accInst.trim(),
+                  type: accType,
+                  openingBalanceMinor: toMinor(accOpenBal),
+                  currency: cur,
+                  color: accColor,
+                  notes: '',
+                  active: true,
+                });
+              }
               setAccName('');
               setAccInst('');
               setAccOpenBal('');
             }}
             className="bento-surface rounded-2xl p-5 lg:col-span-5 space-y-3 h-fit"
           >
-            <h3 className="text-sm font-bold">New Account</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold">{editingAcc ? 'Edit Account' : 'New Account'}</h3>
+              {editingAcc && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingAcc(null);
+                    setAccName('');
+                    setAccInst('');
+                    setAccOpenBal('');
+                  }}
+                  className="text-xs text-[var(--text-secondary)]"
+                >
+                  Cancel edit
+                </button>
+              )}
+            </div>
             <input
               type="text"
+              required
               value={accName}
               onChange={(e) => setAccName(e.target.value)}
               placeholder="Account Name (e.g., HDFC Savings)"
@@ -594,16 +674,17 @@ export const MoneyPage: React.FC = () => {
                   key={c}
                   type="button"
                   onClick={() => setAccColor(c)}
-                  className={`w-6 h-6 rounded-full border-2 ${accColor === c ? 'border-white scale-110' : 'border-transparent'}`}
+                  aria-label={`Select color ${c}`}
+                  className={`w-6 h-6 rounded-full border-2 ${accColor === c ? 'border-[var(--text-primary)] scale-110' : 'border-transparent'}`}
                   style={{ backgroundColor: c }}
                 />
               ))}
             </div>
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold"
+              className="w-full py-2.5 rounded-xl bg-accent text-xs font-semibold"
             >
-              Create Account
+              {editingAcc ? 'Save Account Changes' : 'Create Account'}
             </button>
           </form>
         </div>
@@ -618,8 +699,8 @@ export const MoneyPage: React.FC = () => {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search merchant, category, description..."
-                className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3.5 py-2 text-xs w-60"
+                placeholder="Search merchant, category, tag..."
+                className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3.5 py-2 text-xs w-56"
               />
               <select
                 value={typeFilter}
@@ -632,6 +713,26 @@ export const MoneyPage: React.FC = () => {
                 <option value="transfer">Transfer</option>
                 <option value="refund">Refund</option>
                 <option value="adjustment">Adjustment</option>
+              </select>
+              <select
+                value={catFilter}
+                onChange={(e) => setCatFilter(e.target.value)}
+                className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-xs"
+              >
+                <option value="all">All Categories</option>
+                {store.categories.map((c) => (
+                  <option key={c.id} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+              <select
+                value={accFilter}
+                onChange={(e) => setAccFilter(e.target.value)}
+                className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-xs"
+              >
+                <option value="all">All Accounts</option>
+                {store.accounts.map((a) => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
               </select>
               <select
                 value={rangeFilter}
@@ -673,7 +774,7 @@ export const MoneyPage: React.FC = () => {
             </div>
           </div>
 
-          {csvFeedback && <p className="text-xs text-emerald-500">{csvFeedback}</p>}
+          {csvFeedback && <p className="text-xs text-accent">{csvFeedback}</p>}
 
           {selectedTxIds.length > 0 && (
             <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-[var(--bg-elevated)]">
@@ -694,7 +795,7 @@ export const MoneyPage: React.FC = () => {
                     store.bulkCategorizeTransactions(selectedTxIds, bulkCat);
                     setSelectedTxIds([]);
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold"
+                  className="px-3 py-1.5 rounded-lg bg-accent text-xs font-semibold"
                 >
                   Bulk Categorize
                 </button>
@@ -708,7 +809,7 @@ export const MoneyPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => openNewTxModal('expense')}
-                className="text-xs font-semibold text-emerald-500 hover:underline"
+                className="text-xs font-semibold text-accent hover:underline"
               >
                 Log your first transaction
               </button>
@@ -726,39 +827,42 @@ export const MoneyPage: React.FC = () => {
                     : 'text-[var(--text-primary)]';
                 return (
                   <div key={tx.id} className="py-3 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() =>
-                          setSelectedTxIds((prev) =>
-                            checked ? prev.filter((id) => id !== tx.id) : [...prev, tx.id]
-                          )
-                        }
-                        className="rounded"
-                      />
+                    <div className="flex items-center gap-2 min-w-0">
+                      <label className="min-w-[36px] min-h-[36px] flex items-center justify-center shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() =>
+                            setSelectedTxIds((prev) =>
+                              checked ? prev.filter((id) => id !== tx.id) : [...prev, tx.id]
+                            )
+                          }
+                          className="rounded w-4 h-4"
+                        />
+                      </label>
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">
                           {tx.description || tx.merchant || tx.category}
                         </p>
                         <p className="text-xs text-[var(--text-secondary)] truncate">
-                          {tx.type} · {tx.category} · {accountNameMap.get(tx.accountId) || 'Account'}
+                          {tx.type} · {tx.category}{tx.subcategory ? ` / ${tx.subcategory}` : ''} · {accountNameMap.get(tx.accountId) || 'Account'}
                           {tx.toAccountId ? ` → ${accountNameMap.get(tx.toAccountId) || 'Target'}` : ''} · {tx.date}
+                          {tx.recurring ? ` · ${tx.recurrence}` : ''}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-sm font-bold font-mono-num ${amountCls}`}>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className={`text-sm font-bold font-mono-num mr-1 ${amountCls}`}>
                         {sign}{formatMoney(tx.amountMinor, cur)}
                       </span>
-                      <button type="button" onClick={() => openEditTxModal(tx)} aria-label="Edit" className="p-1.5 rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+                      <button type="button" onClick={() => openEditTxModal(tx)} aria-label="Edit" className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
-                      <button type="button" onClick={() => store.duplicateTransaction(tx.id)} aria-label="Duplicate" className="p-1.5 rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+                      <button type="button" onClick={() => store.duplicateTransaction(tx.id)} aria-label="Duplicate" className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
                         <Copy className="w-3.5 h-3.5" />
                       </button>
-                      <button type="button" onClick={() => store.deleteTransaction(tx.id)} aria-label="Delete" className="p-1.5 rounded-lg hover:bg-[var(--bg-hover)] text-rose-400">
+                      <button type="button" onClick={() => store.deleteTransaction(tx.id)} aria-label="Delete" className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-[var(--bg-hover)] text-rose-400">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -795,11 +899,28 @@ export const MoneyPage: React.FC = () => {
                             {row.budget.category} · {row.budget.period} · {row.status === 'exceeded' ? 'Over limit' : row.status === 'warning' ? 'Near threshold' : 'On track'}
                           </p>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                           <span className="text-xs font-mono-num font-semibold">
                             {formatMoney(row.spentMinor, cur)} / {formatMoney(row.budget.limitMinor, cur)}
                           </span>
-                          <button type="button" onClick={() => store.deleteBudget(row.budget.id)} className="text-rose-400 p-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingBudget(row.budget);
+                              setBudName(row.budget.name);
+                              setBudCat(row.budget.category);
+                              setBudLimit(String(fromMinor(row.budget.limitMinor)));
+                              setBudPeriod(row.budget.period);
+                              setBudStart(row.budget.startDate || todayISO());
+                              setBudEnd(row.budget.endDate || todayISO());
+                              setBudWarnPct(String(row.budget.warningThresholdPct));
+                            }}
+                            aria-label="Edit budget"
+                            className="p-1.5 rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button type="button" onClick={() => store.deleteBudget(row.budget.id)} aria-label="Delete budget" className="text-rose-400 p-1.5">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -822,20 +943,35 @@ export const MoneyPage: React.FC = () => {
               e.preventDefault();
               const lim = toMinor(budLimit);
               if (lim <= 0) return;
-              store.addBudget({
+              const payload = {
                 name: budName.trim() || `${budCat} Budget`,
                 category: budCat,
                 limitMinor: lim,
                 period: budPeriod,
+                startDate: budPeriod === 'custom' ? budStart : null,
+                endDate: budPeriod === 'custom' ? budEnd : null,
                 warningThresholdPct: Number(budWarnPct) || 80,
                 notes: '',
-              });
+              };
+              if (editingBudget) {
+                store.updateBudget(editingBudget.id, payload);
+                setEditingBudget(null);
+              } else {
+                store.addBudget(payload);
+              }
               setBudName('');
               setBudLimit('');
             }}
             className="bento-surface rounded-2xl p-5 lg:col-span-5 space-y-3 h-fit"
           >
-            <h3 className="text-sm font-bold">Create Budget</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold">{editingBudget ? 'Edit Budget' : 'Create Budget'}</h3>
+              {editingBudget && (
+                <button type="button" onClick={() => setEditingBudget(null)} className="text-xs text-[var(--text-secondary)]">
+                  Cancel
+                </button>
+              )}
+            </div>
             <input type="text" value={budName} onChange={(e) => setBudName(e.target.value)} placeholder="Budget Name (e.g., Monthly Dining)" className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3.5 py-2 text-sm" />
             <div className="grid grid-cols-2 gap-2">
               <select value={budCat} onChange={(e) => setBudCat(e.target.value)} className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm">
@@ -850,12 +986,18 @@ export const MoneyPage: React.FC = () => {
                 <option value="custom">Custom</option>
               </select>
             </div>
+            {budPeriod === 'custom' && (
+              <div className="grid grid-cols-2 gap-2">
+                <input type="date" value={budStart} onChange={(e) => setBudStart(e.target.value)} className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
+                <input type="date" value={budEnd} onChange={(e) => setBudEnd(e.target.value)} className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-2">
-              <input type="number" value={budLimit} onChange={(e) => setBudLimit(e.target.value)} placeholder={`Limit (${cur})`} className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3.5 py-2 text-sm font-mono-num" />
+              <input type="number" required value={budLimit} onChange={(e) => setBudLimit(e.target.value)} placeholder={`Limit (${cur})`} className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3.5 py-2 text-sm font-mono-num" />
               <input type="number" value={budWarnPct} onChange={(e) => setBudWarnPct(e.target.value)} placeholder="Alert %" className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3.5 py-2 text-sm font-mono-num" />
             </div>
-            <button type="submit" className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold">
-              Save Budget
+            <button type="submit" className="w-full py-2.5 rounded-xl bg-accent text-xs font-semibold">
+              {editingBudget ? 'Update Budget' : 'Save Budget'}
             </button>
           </form>
         </div>
@@ -890,22 +1032,23 @@ export const MoneyPage: React.FC = () => {
               }}
               className="grid grid-cols-2 gap-2 p-3 rounded-xl bg-[var(--bg-elevated)]"
             >
-              <input type="text" value={savName} onChange={(e) => setSavName(e.target.value)} placeholder="Savings goal name" className="col-span-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs" />
-              <input type="number" value={savTarget} onChange={(e) => setSavTarget(e.target.value)} placeholder="Target amount" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
+              <input type="text" required value={savName} onChange={(e) => setSavName(e.target.value)} placeholder="Savings goal name" className="col-span-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs" />
+              <input type="number" required value={savTarget} onChange={(e) => setSavTarget(e.target.value)} placeholder="Target amount" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
               <input type="number" value={savCurrent} onChange={(e) => setSavCurrent(e.target.value)} placeholder="Current saved" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
               <label className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
                 <input type="checkbox" checked={savEmergency} onChange={(e) => setSavEmergency(e.target.checked)} />
                 Emergency fund
               </label>
-              <button type="submit" className="py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Add Target</button>
+              <button type="submit" className="py-2 rounded-lg bg-accent text-xs font-semibold">Add Target</button>
             </form>
 
             <div className="divide-y bento-divider">
               {store.savingsGoals.map((sg) => {
                 const pct = sg.targetMinor > 0 ? Math.min(100, Math.round((sg.currentMinor / sg.targetMinor) * 100)) : 0;
+                const depositAmt = savDepositById[sg.id] ?? '';
                 return (
                   <div key={sg.id} className="py-3 space-y-2">
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <p className="text-sm font-semibold">
                           {sg.name} {sg.isEmergencyFund ? '· Emergency Fund' : ''}
@@ -914,13 +1057,26 @@ export const MoneyPage: React.FC = () => {
                           {formatMoney(sg.currentMinor, cur)} / {formatMoney(sg.targetMinor, cur)} ({pct}%)
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="number"
+                          value={depositAmt}
+                          onChange={(e) => setSavDepositById((p) => ({ ...p, [sg.id]: e.target.value }))}
+                          placeholder="Amount"
+                          className="w-20 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-2 py-1 text-xs font-mono-num"
+                        />
                         <button
                           type="button"
-                          onClick={() => store.contributeSavings(sg.id, toMinor(1000), 'Quick deposit')}
-                          className="px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--bg-hover)] text-xs font-medium"
+                          onClick={() => {
+                            const amt = toMinor(depositAmt || 1000);
+                            if (amt > 0) {
+                              store.contributeSavings(sg.id, amt, 'Contribution');
+                              setSavDepositById((p) => ({ ...p, [sg.id]: '' }));
+                            }
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-accent text-xs font-medium"
                         >
-                          +1,000
+                          Add
                         </button>
                         <button type="button" onClick={() => store.deleteSavingsGoal(sg.id)} className="text-rose-400 p-1">
                           <Trash2 className="w-3.5 h-3.5" />
@@ -928,7 +1084,7 @@ export const MoneyPage: React.FC = () => {
                       </div>
                     </div>
                     <div className="h-1.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
-                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${pct}%` }} />
+                      <div className="h-full bg-accent rounded-full" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );
@@ -966,7 +1122,7 @@ export const MoneyPage: React.FC = () => {
               }}
               className="grid grid-cols-2 gap-2 p-3 rounded-xl bg-[var(--bg-elevated)]"
             >
-              <input type="text" value={invName} onChange={(e) => setInvName(e.target.value)} placeholder="Asset name (e.g., Nifty 50 Index)" className="col-span-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs" />
+              <input type="text" required value={invName} onChange={(e) => setInvName(e.target.value)} placeholder="Asset name (e.g., Nifty 50 Index)" className="col-span-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs" />
               <select value={invType} onChange={(e) => setInvType(e.target.value as InvestmentAssetType)} className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs">
                 <option value="mutual_funds">Mutual Funds</option>
                 <option value="stocks">Stocks</option>
@@ -975,32 +1131,60 @@ export const MoneyPage: React.FC = () => {
                 <option value="other">Other Asset</option>
               </select>
               <input type="number" value={invQty} onChange={(e) => setInvQty(e.target.value)} placeholder="Quantity (opt)" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
-              <input type="number" value={invInvested} onChange={(e) => setInvInvested(e.target.value)} placeholder="Invested amount" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
+              <input type="number" required value={invInvested} onChange={(e) => setInvInvested(e.target.value)} placeholder="Invested amount" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
               <input type="number" value={invCurrent} onChange={(e) => setInvCurrent(e.target.value)} placeholder="Manual valuation" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
               <input type="date" value={invDate} onChange={(e) => setInvDate(e.target.value)} className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
-              <button type="submit" className="py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Add Holding</button>
+              <button type="submit" className="py-2 rounded-lg bg-accent text-xs font-semibold">Add Holding</button>
             </form>
 
             <div className="divide-y bento-divider">
               {store.investments.map((inv) => {
                 const gainMinor = inv.currentValuationMinor - inv.investedMinor;
+                const valInput = invValEditById[inv.id] ?? '';
                 return (
-                  <div key={inv.id} className="py-3 flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold truncate">{inv.name}</p>
-                      <p className="text-xs text-[var(--text-secondary)]">
-                        {inv.assetType.replace('_', ' ')} · Manual valuation ({inv.valuationUpdatedAt})
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0 flex items-center gap-3">
-                      <div>
-                        <p className="text-sm font-bold font-mono-num">{formatMoney(inv.currentValuationMinor, cur)}</p>
-                        <p className={`text-[11px] font-mono-num ${gainMinor >= 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
-                          {gainMinor >= 0 ? '+' : ''}{formatMoney(gainMinor, cur)}
+                  <div key={inv.id} className="py-3 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold truncate">{inv.name}</p>
+                        <p className="text-xs text-[var(--text-secondary)]">
+                          {inv.assetType.replace('_', ' ')} · Manual valuation ({inv.valuationUpdatedAt})
                         </p>
                       </div>
-                      <button type="button" onClick={() => store.deleteInvestment(inv.id)} className="text-rose-400 p-1">
-                        <Trash2 className="w-3.5 h-3.5" />
+                      <div className="text-right shrink-0 flex items-center gap-2">
+                        <div>
+                          <p className="text-sm font-bold font-mono-num">{formatMoney(inv.currentValuationMinor, cur)}</p>
+                          <p className={`text-[11px] font-mono-num ${gainMinor >= 0 ? 'text-emerald-500' : 'text-rose-400'}`}>
+                            {gainMinor >= 0 ? '+' : ''}{formatMoney(gainMinor, cur)}
+                          </p>
+                        </div>
+                        <button type="button" onClick={() => store.deleteInvestment(inv.id)} className="text-rose-400 p-1">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={valInput}
+                        onChange={(e) => setInvValEditById((p) => ({ ...p, [inv.id]: e.target.value }))}
+                        placeholder="New manual valuation"
+                        className="flex-1 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-2.5 py-1 text-xs font-mono-num"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nextVal = toMinor(valInput);
+                          if (nextVal > 0) {
+                            store.updateInvestment(inv.id, {
+                              currentValuationMinor: nextVal,
+                              valuationUpdatedAt: todayISO(),
+                            });
+                            setInvValEditById((p) => ({ ...p, [inv.id]: '' }));
+                          }
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--bg-hover)] text-xs font-medium"
+                      >
+                        Update Value
                       </button>
                     </div>
                   </div>
@@ -1037,7 +1221,7 @@ export const MoneyPage: React.FC = () => {
               }}
               className="grid grid-cols-2 gap-2 p-3 rounded-xl bg-[var(--bg-elevated)]"
             >
-              <input type="text" value={debtTitle} onChange={(e) => setDebtTitle(e.target.value)} placeholder="Title (e.g., Car EMI, Lent to Alex)" className="col-span-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs" />
+              <input type="text" required value={debtTitle} onChange={(e) => setDebtTitle(e.target.value)} placeholder="Title (e.g., Car EMI, Lent to Alex)" className="col-span-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs" />
               <select value={debtKind} onChange={(e) => setDebtKind(e.target.value as DebtKind)} className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs">
                 <option value="loan">Loan</option>
                 <option value="emi">EMI</option>
@@ -1045,36 +1229,57 @@ export const MoneyPage: React.FC = () => {
                 <option value="borrowed">Borrowed</option>
                 <option value="lent">Money Lent</option>
               </select>
-              <input type="number" value={debtPrincipal} onChange={(e) => setDebtPrincipal(e.target.value)} placeholder="Amount" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
+              <input type="text" value={debtCounterparty} onChange={(e) => setDebtCounterparty(e.target.value)} placeholder="Lender / Person" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs" />
+              <input type="number" required value={debtPrincipal} onChange={(e) => setDebtPrincipal(e.target.value)} placeholder="Amount" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
               <input type="date" value={debtDue} onChange={(e) => setDebtDue(e.target.value)} className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
-              <button type="submit" className="py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Add Record</button>
+              <button type="submit" className="col-span-2 py-2 rounded-lg bg-accent text-xs font-semibold">Add Record</button>
             </form>
 
             <div className="divide-y bento-divider">
-              {store.debts.map((d) => (
-                <div key={d.id} className="py-3 flex items-center justify-between gap-2">
-                  <div>
-                    <p className="text-sm font-semibold">{d.title}</p>
-                    <p className="text-xs text-[var(--text-secondary)]">
-                      {d.kind.replace('_', ' ')} · Remaining {formatMoney(d.remainingMinor, cur)} · Due {d.dueDate || '—'}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {d.remainingMinor > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => store.recordDebtPayment(d.id, Math.min(d.remainingMinor, toMinor(1000)), 'Repayment')}
-                        className="px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] hover:bg-[var(--bg-hover)] text-xs font-medium"
-                      >
-                        Pay 1,000
+              {store.debts.map((d) => {
+                const payVal = debtPayById[d.id] ?? '';
+                return (
+                  <div key={d.id} className="py-3 flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold">
+                        {d.title} {d.counterparty ? `· ${d.counterparty}` : ''}
+                      </p>
+                      <p className="text-xs text-[var(--text-secondary)]">
+                        {d.kind.replace('_', ' ')} · Remaining {formatMoney(d.remainingMinor, cur)} · Due {d.dueDate || '—'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {d.remainingMinor > 0 && (
+                        <>
+                          <input
+                            type="number"
+                            value={payVal}
+                            onChange={(e) => setDebtPayById((p) => ({ ...p, [d.id]: e.target.value }))}
+                            placeholder="Repay"
+                            className="w-20 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-2 py-1 text-xs font-mono-num"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const amt = toMinor(payVal || 1000);
+                              if (amt > 0) {
+                                store.recordDebtPayment(d.id, Math.min(d.remainingMinor, amt), 'Repayment');
+                                setDebtPayById((p) => ({ ...p, [d.id]: '' }));
+                              }
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-accent text-xs font-medium"
+                          >
+                            Pay
+                          </button>
+                        </>
+                      )}
+                      <button type="button" onClick={() => store.deleteDebt(d.id)} className="text-rose-400 p-1">
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
-                    )}
-                    <button type="button" onClick={() => store.deleteDebt(d.id)} className="text-rose-400 p-1">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -1091,6 +1296,7 @@ export const MoneyPage: React.FC = () => {
                   amountMinor: toMinor(billAmount),
                   frequency: billFreq,
                   nextDueDate: billNextDue,
+                  accountId: billAccountId || store.accounts[0]?.id || null,
                   category: billCat,
                   reminderDaysBefore: 3,
                   notes: '',
@@ -1101,7 +1307,7 @@ export const MoneyPage: React.FC = () => {
               }}
               className="grid grid-cols-2 gap-2 p-3 rounded-xl bg-[var(--bg-elevated)]"
             >
-              <input type="text" value={billName} onChange={(e) => setBillName(e.target.value)} placeholder="Bill / Subscription name" className="col-span-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs" />
+              <input type="text" required value={billName} onChange={(e) => setBillName(e.target.value)} placeholder="Bill / Subscription name" className="col-span-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs" />
               <select value={billKind} onChange={(e) => setBillKind(e.target.value as 'bill' | 'subscription')} className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs">
                 <option value="subscription">Subscription</option>
                 <option value="bill">Bill</option>
@@ -1112,14 +1318,20 @@ export const MoneyPage: React.FC = () => {
                 <option value="quarterly">Quarterly</option>
                 <option value="yearly">Yearly</option>
               </select>
-              <input type="number" value={billAmount} onChange={(e) => setBillAmount(e.target.value)} placeholder="Amount" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
+              <input type="number" required value={billAmount} onChange={(e) => setBillAmount(e.target.value)} placeholder="Amount" className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
               <input type="date" value={billNextDue} onChange={(e) => setBillNextDue(e.target.value)} className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num" />
               <select value={billCat} onChange={(e) => setBillCat(e.target.value)} className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs">
                 {store.categories.filter((c) => c.kind === 'expense').map((c) => (
                   <option key={c.id} value={c.name}>{c.name}</option>
                 ))}
               </select>
-              <button type="submit" className="py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Add Bill</button>
+              <select value={billAccountId} onChange={(e) => setBillAccountId(e.target.value)} className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-2 text-xs">
+                <option value="">Default Account</option>
+                {store.accounts.map((a) => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </select>
+              <button type="submit" className="col-span-2 py-2 rounded-lg bg-accent text-xs font-semibold">Add Bill</button>
             </form>
 
             <div className="divide-y bento-divider">
@@ -1136,7 +1348,7 @@ export const MoneyPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => store.markBillPaid(b.id, true)}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-medium"
+                      className="px-2.5 py-1 rounded-lg bg-accent text-xs font-medium"
                     >
                       Mark Paid
                     </button>
@@ -1199,13 +1411,13 @@ export const MoneyPage: React.FC = () => {
             className="bento-surface rounded-2xl p-5 lg:col-span-4 space-y-3 h-fit"
           >
             <h3 className="text-sm font-bold">Add Custom Category</h3>
-            <input type="text" value={catName} onChange={(e) => setCatName(e.target.value)} placeholder="Category name" className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm" />
+            <input type="text" required value={catName} onChange={(e) => setCatName(e.target.value)} placeholder="Category name" className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm" />
             <select value={catKind} onChange={(e) => setCatKind(e.target.value as 'expense' | 'income')} className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm">
               <option value="expense">Expense</option>
               <option value="income">Income</option>
             </select>
             <input type="text" value={catSub} onChange={(e) => setCatSub(e.target.value)} placeholder="Subcategories (comma-separated)" className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm" />
-            <button type="submit" className="w-full py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold">Create Category</button>
+            <button type="submit" className="w-full py-2.5 rounded-xl bg-accent text-xs font-semibold">Create Category</button>
           </form>
         </div>
       )}
@@ -1216,7 +1428,7 @@ export const MoneyPage: React.FC = () => {
           <form
             onSubmit={handleSaveTx}
             onClick={(e) => e.stopPropagation()}
-            className="bento-surface w-full max-w-md rounded-2xl p-6 space-y-4"
+            className="bento-surface w-full max-w-md rounded-2xl p-6 space-y-3 max-h-[90vh] overflow-y-auto bento-scroll"
           >
             <h3 className="text-base font-bold">{editingTx ? 'Edit Transaction' : 'New Transaction'}</h3>
             <div className="grid grid-cols-5 gap-1 p-1 rounded-xl bg-[var(--bg-elevated)]">
@@ -1238,13 +1450,16 @@ export const MoneyPage: React.FC = () => {
               <input type="date" value={txDate} onChange={(e) => setTxDate(e.target.value)} className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm font-mono-num" />
             </div>
             {txType !== 'transfer' && (
-              <select value={txCategory} onChange={(e) => setTxCategory(e.target.value)} className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm">
-                {store.categories
-                  .filter((c) => (txType === 'income' ? c.kind === 'income' : c.kind === 'expense'))
-                  .map((c) => (
-                    <option key={c.id} value={c.name}>{c.name}</option>
-                  ))}
-              </select>
+              <div className="grid grid-cols-2 gap-3">
+                <select value={txCategory} onChange={(e) => setTxCategory(e.target.value)} className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm">
+                  {store.categories
+                    .filter((c) => (txType === 'income' ? c.kind === 'income' : c.kind === 'expense'))
+                    .map((c) => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))}
+                </select>
+                <input type="text" value={txSubcategory} onChange={(e) => setTxSubcategory(e.target.value)} placeholder="Subcategory (opt)" className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm" />
+              </div>
             )}
             <div className="grid grid-cols-2 gap-3">
               <select value={txAccountId} onChange={(e) => setTxAccountId(e.target.value)} className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm">
@@ -1259,9 +1474,25 @@ export const MoneyPage: React.FC = () => {
             </div>
             <input type="text" value={txMerchant} onChange={(e) => setTxMerchant(e.target.value)} placeholder="Merchant / Payee" className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm" />
             <input type="text" value={txDescription} onChange={(e) => setTxDescription(e.target.value)} placeholder="Description" className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm" />
+            <input type="text" value={txTags} onChange={(e) => setTxTags(e.target.value)} placeholder="Tags (comma-separated)" className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-xs" />
+            <textarea rows={2} value={txNotes} onChange={(e) => setTxNotes(e.target.value)} placeholder="Notes (optional)" className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-xs" />
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={txRecurring} onChange={(e) => setTxRecurring(e.target.checked)} />
+                <span>Recurring transaction</span>
+              </label>
+              {txRecurring && (
+                <select value={txRecurrence} onChange={(e) => setTxRecurrence(e.target.value as RecurrencePattern)} className="rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-2 py-1">
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              )}
+            </div>
             <div className="flex justify-end gap-2 pt-2">
               <button type="button" onClick={() => setTxModalOpen(false)} className="px-4 py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)]">Cancel</button>
-              <button type="submit" className="px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold">Save</button>
+              <button type="submit" className="px-5 py-2 rounded-xl bg-accent text-xs font-semibold">Save</button>
             </div>
           </form>
         </div>

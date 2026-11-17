@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
   Bell,
+  Clock,
   Download,
   Lock,
   ShieldCheck,
@@ -13,7 +14,7 @@ import { deriveActiveReminders, isWithinQuietHours } from '../services/notificat
 import { createZipBackupBlob, parseAndValidateBackupFile, sha256Hex } from '../services/backup';
 import { exportTransactionsToCSV, formatMoney, todayISO } from '../utils/finance';
 import { CURRENCY_OPTIONS } from '../utils/defaults';
-import { AccentChoice, BentoScoreWeights, ThemeMode } from '../types/bento';
+import { AccentChoice, BentoDatabaseSnapshot, BentoScoreWeights, ThemeMode, TimeFormat } from '../types/bento';
 
 type MoreTab = 'reviews' | 'score' | 'notifications' | 'backup' | 'privacy_ai' | 'settings';
 
@@ -29,6 +30,11 @@ export const MorePage: React.FC = () => {
   const [restorePassword, setRestorePassword] = useState('');
   const [restoreMode, setRestoreMode] = useState<'merge' | 'replace'>('merge');
   const [backupStatus, setBackupStatus] = useState('');
+  const [pendingRestore, setPendingRestore] = useState<{
+    snapshot: BentoDatabaseSnapshot;
+    schemaVersion: number;
+    fileName: string;
+  } | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const restoreInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -39,12 +45,16 @@ export const MorePage: React.FC = () => {
   const review = useMemo(() => generatePeriodReview(snap, reviewMode), [snap, reviewMode]);
   const insights = useMemo(() => generateExplainableInsights(snap), [snap]);
   const bentoScore = useMemo(() => computeBentoScore(snap), [snap]);
+  const nowIso = new Date().toISOString();
   const reminders = useMemo(
     () =>
-      deriveActiveReminders(snap).filter(
-        (r) => !store.dismissedNotificationIds.includes(r.id)
-      ),
-    [snap, store.dismissedNotificationIds]
+      deriveActiveReminders(snap).filter((r) => {
+        if (store.dismissedNotificationIds.includes(r.id)) return false;
+        const snoozedUntil = store.snoozedNotifications[r.id];
+        if (snoozedUntil && snoozedUntil > nowIso) return false;
+        return true;
+      }),
+    [snap, store.dismissedNotificationIds, store.snoozedNotifications, nowIso]
   );
 
   const handleExportJSON = () => {
@@ -92,14 +102,26 @@ export const MorePage: React.FC = () => {
     const res = await parseAndValidateBackupFile(file, restorePassword);
     if (!res.valid || !res.snapshot) {
       setBackupStatus(res.error || 'Backup validation failed.');
+      setPendingRestore(null);
       e.target.value = '';
       return;
     }
-    store.restoreFromSnapshot(res.snapshot, restoreMode);
-    setBackupStatus(
-      `Restored backup (schema v${res.schemaVersion}, ${res.snapshot.transactions.length} transactions, ${res.snapshot.tasks.length} tasks) via ${restoreMode}.`
-    );
+    setPendingRestore({
+      snapshot: res.snapshot,
+      schemaVersion: res.schemaVersion,
+      fileName: file.name,
+    });
+    setBackupStatus('');
     e.target.value = '';
+  };
+
+  const confirmPendingRestore = () => {
+    if (!pendingRestore) return;
+    store.restoreFromSnapshot(pendingRestore.snapshot, restoreMode);
+    setBackupStatus(
+      `Restored "${pendingRestore.fileName}" (schema v${pendingRestore.schemaVersion}, ${pendingRestore.snapshot.transactions.length} transactions, ${pendingRestore.snapshot.tasks.length} tasks) via ${restoreMode}.`
+    );
+    setPendingRestore(null);
   };
 
   const handleSetPin = async (e: React.FormEvent) => {
@@ -149,7 +171,7 @@ export const MorePage: React.FC = () => {
             onClick={() => setTab(t.id)}
             className={`px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap shrink-0 transition-colors ${
               tab === t.id
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-accent'
                 : 'bg-[var(--bg-surface)] border border-[var(--border-hairline)] text-[var(--text-secondary)]'
             }`}
           >
@@ -200,7 +222,7 @@ export const MorePage: React.FC = () => {
               </div>
               <div>
                 <p className="text-[11px] text-[var(--text-secondary)]">Net Saved</p>
-                <p className="text-lg font-bold font-mono-num text-emerald-500">{formatMoney(review.savingsMinor, cur)}</p>
+                <p className="text-lg font-bold font-mono-num text-accent">{formatMoney(review.savingsMinor, cur)}</p>
               </div>
               <div>
                 <p className="text-[11px] text-[var(--text-secondary)]">Learning</p>
@@ -243,11 +265,16 @@ export const MorePage: React.FC = () => {
             ) : (
               <div className="divide-y bento-divider">
                 {insights.map((ins) => (
-                  <div key={ins.id} className="py-3 space-y-0.5">
+                  <button
+                    key={ins.id}
+                    type="button"
+                    onClick={() => store.setActiveSection(ins.route)}
+                    className="w-full py-3 text-left space-y-0.5 hover:bg-[var(--bg-hover)]/40 rounded-lg px-2 transition-colors"
+                  >
                     <p className="text-sm font-semibold">{ins.title}</p>
                     <p className="text-xs text-[var(--text-secondary)]">{ins.detail}</p>
                     <p className="text-[11px] text-[var(--text-muted)]">Trace: {ins.trace}</p>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -276,7 +303,7 @@ export const MorePage: React.FC = () => {
           {bentoScore.enabled && (
             <>
               <div className="p-4 rounded-xl bg-[var(--bg-elevated)] flex items-baseline gap-3">
-                <span className="text-4xl font-extrabold font-mono-num text-emerald-500">
+                <span className="text-4xl font-extrabold font-mono-num text-accent">
                   {bentoScore.overallScore ?? '—'}
                 </span>
                 <span className="text-xs text-[var(--text-secondary)]">
@@ -314,7 +341,7 @@ export const MorePage: React.FC = () => {
 
       {/* 3. NOTIFICATION CENTER */}
       {tab === 'notifications' && (
-        <div className="bento-surface rounded-2xl p-5 space-y-4">
+        <div className="bento-surface rounded-2xl p-5 space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-bold">Notification Center</h2>
@@ -332,17 +359,56 @@ export const MorePage: React.FC = () => {
               }}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--bg-elevated)] text-xs font-medium"
             >
-              <Bell className="w-3.5 h-3.5 text-emerald-500" />
+              <Bell className="w-3.5 h-3.5 text-accent" />
               <span>Enable Browser Alerts</span>
             </button>
           </div>
 
-          {reminders.length === 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3.5 rounded-xl bg-[var(--bg-elevated)] text-xs">
+            <label className="flex items-center gap-2 font-medium">
+              <input
+                type="checkbox"
+                checked={store.settings.notificationsEnabled}
+                onChange={(e) => store.updateSettings({ notificationsEnabled: e.target.checked })}
+              />
+              <span>In-App Reminders</span>
+            </label>
+            <label className="flex items-center gap-2 font-medium">
+              <input
+                type="checkbox"
+                checked={store.settings.quietHoursEnabled}
+                onChange={(e) => store.updateSettings({ quietHoursEnabled: e.target.checked })}
+              />
+              <span>Enable Quiet Hours</span>
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-[var(--text-muted)]">Start</span>
+              <input
+                type="time"
+                value={store.settings.quietHoursStart}
+                onChange={(e) => store.updateSettings({ quietHoursStart: e.target.value })}
+                className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-2 py-1 font-mono-num"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[var(--text-muted)]">End</span>
+              <input
+                type="time"
+                value={store.settings.quietHoursEnd}
+                onChange={(e) => store.updateSettings({ quietHoursEnd: e.target.value })}
+                className="rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-2 py-1 font-mono-num"
+              />
+            </div>
+          </div>
+
+          {!store.settings.notificationsEnabled ? (
+            <p className="text-xs text-[var(--text-muted)] py-8 text-center">Reminders are currently muted in Notification settings.</p>
+          ) : reminders.length === 0 ? (
             <p className="text-xs text-[var(--text-muted)] py-8 text-center">No active reminders or due alerts.</p>
           ) : (
             <div className="divide-y bento-divider">
               {reminders.map((r) => (
-                <div key={r.id} className="py-3 flex items-center justify-between gap-3">
+                <div key={r.id} className="py-3 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold">{r.title}</p>
                     <p className="text-xs text-[var(--text-secondary)]">{r.category} · {r.body}</p>
@@ -354,6 +420,17 @@ export const MorePage: React.FC = () => {
                       className="px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] text-xs font-medium"
                     >
                       Open
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+                        store.snoozeNotification(r.id, tomorrow);
+                      }}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--bg-elevated)] text-xs font-medium"
+                    >
+                      <Clock className="w-3 h-3" />
+                      <span>Snooze 1d</span>
                     </button>
                     <button
                       type="button"
@@ -386,7 +463,7 @@ export const MorePage: React.FC = () => {
               className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3.5 py-2 text-xs"
             />
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={handleExportZIP} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold">
+              <button type="button" onClick={handleExportZIP} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-accent text-xs font-semibold">
                 <Download className="w-3.5 h-3.5" />
                 <span>Download ZIP Backup</span>
               </button>
@@ -399,13 +476,13 @@ export const MorePage: React.FC = () => {
                 <span>CSV Ledger</span>
               </button>
             </div>
-            {backupStatus && <p className="text-xs text-emerald-500">{backupStatus}</p>}
+            {backupStatus && <p className="text-xs text-accent">{backupStatus}</p>}
           </div>
 
           <div className="bento-surface rounded-2xl p-5 space-y-4">
             <h2 className="text-base font-bold">Restore From Backup</h2>
             <p className="text-xs text-[var(--text-secondary)]">
-              Validates schema compatibility and deduplicates records by UUID in Merge mode.
+              Inspects and validates backup contents before restoring. Deduplicates records by UUID in Merge mode.
             </p>
             <div className="grid grid-cols-2 gap-2">
               <select value={restoreMode} onChange={(e) => setRestoreMode(e.target.value as 'merge' | 'replace')} className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-xs">
@@ -426,9 +503,36 @@ export const MorePage: React.FC = () => {
               onClick={() => restoreInputRef.current?.click()}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] hover:bg-[var(--bg-hover)] text-xs font-semibold"
             >
-              <Upload className="w-3.5 h-3.5 text-emerald-500" />
+              <Upload className="w-3.5 h-3.5 text-accent" />
               <span>Choose .ZIP or .JSON Backup</span>
             </button>
+
+            {pendingRestore && (
+              <div className="p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-accent space-y-2 text-xs">
+                <p className="font-bold">Backup Ready: {pendingRestore.fileName}</p>
+                <p className="text-[var(--text-secondary)] font-mono-num">
+                  Schema v{pendingRestore.schemaVersion} · {pendingRestore.snapshot.transactions.length} transactions ·{' '}
+                  {pendingRestore.snapshot.tasks.length} tasks · {pendingRestore.snapshot.habits.length} habits ·{' '}
+                  {pendingRestore.snapshot.goals.length} goals · {pendingRestore.snapshot.attachments.length} attachments
+                </p>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={confirmPendingRestore}
+                    className="px-3.5 py-1.5 rounded-lg bg-accent text-xs font-semibold"
+                  >
+                    Confirm {restoreMode === 'merge' ? 'Merge' : 'Replace'} Restore
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPendingRestore(null)}
+                    className="px-3 py-1.5 rounded-lg text-xs text-[var(--text-secondary)]"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -438,7 +542,7 @@ export const MorePage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div className="bento-surface rounded-2xl p-5 space-y-4">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              <ShieldCheck className="w-4 h-4 text-accent" />
               <h2 className="text-base font-bold">Privacy & App Lock</h2>
             </div>
             <p className="text-xs text-[var(--text-secondary)]">
@@ -453,11 +557,11 @@ export const MorePage: React.FC = () => {
                 placeholder="Set 4+ digit PIN"
                 className="flex-1 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-xs font-mono-num"
               />
-              <button type="submit" className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold">
+              <button type="submit" className="px-4 py-2 rounded-xl bg-accent text-xs font-semibold">
                 Enable PIN
               </button>
             </form>
-            {pinMsg && <p className="text-xs text-emerald-500">{pinMsg}</p>}
+            {pinMsg && <p className="text-xs text-accent">{pinMsg}</p>}
             {store.settings.appLockEnabled && (
               <div className="flex items-center gap-2">
                 <button
@@ -483,9 +587,17 @@ export const MorePage: React.FC = () => {
             <h2 className="text-base font-bold">BENTO Assistant Layers</h2>
             <div className="space-y-2 text-xs text-[var(--text-secondary)]">
               <p><strong>Layer 1 (Active):</strong> Deterministic offline parser handles finances, tasks, goals, study, and local Q&A with zero internet.</p>
-              <p><strong>Layer 2 (Local Model Adapter):</strong> Optional on-device runtime check (no local LLM binary bundled in browser).</p>
+              <p><strong>Layer 2 (Local Model Adapter):</strong> Optional browser/on-device runtime check (falls back cleanly to Layer 1 when no local model runtime is present).</p>
               <p><strong>Layer 3 (External AI):</strong> Disabled by default. Never transmits personal data unless explicitly enabled below.</p>
             </div>
+            <label className="flex items-center gap-2 text-xs font-medium">
+              <input
+                type="checkbox"
+                checked={store.settings.aiLayer2LocalEnabled}
+                onChange={(e) => store.updateSettings({ aiLayer2LocalEnabled: e.target.checked })}
+              />
+              <span>Enable Layer 2 On-Device Model Probe (when supported)</span>
+            </label>
             <label className="flex items-center gap-2 text-xs font-medium">
               <input
                 type="checkbox"
@@ -589,6 +701,30 @@ export const MorePage: React.FC = () => {
                 <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                 <option value="MM/DD/YYYY">MM/DD/YYYY</option>
                 <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs text-[var(--text-secondary)] mb-1">Time Format</label>
+              <select
+                value={store.settings.timeFormat}
+                onChange={(e) => store.updateSettings({ timeFormat: e.target.value as TimeFormat })}
+                className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm"
+              >
+                <option value="12h">12-hour (AM/PM)</option>
+                <option value="24h">24-hour</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs text-[var(--text-secondary)] mb-1">Language</label>
+              <select
+                value={store.settings.language}
+                onChange={(e) => store.updateSettings({ language: e.target.value })}
+                className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm"
+              >
+                <option value="en">English (Global)</option>
+                <option value="en-IN">English (India)</option>
               </select>
             </div>
           </div>

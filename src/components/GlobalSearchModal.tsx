@@ -210,7 +210,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
               onClick={() => setModuleFilter(mod)}
               className={`px-2.5 py-1 text-xs font-medium rounded-lg capitalize whitespace-nowrap shrink-0 transition-colors ${
                 moduleFilter === mod
-                  ? 'bg-emerald-600 text-white'
+                  ? 'bg-accent'
                   : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
               }`}
             >

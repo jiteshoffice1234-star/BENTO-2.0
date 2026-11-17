@@ -42,7 +42,7 @@ export const OnboardingModal: React.FC = () => {
       <div className="bento-surface w-full max-w-lg rounded-2xl p-6 sm:p-8 shadow-2xl">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
-            <p className="text-xs font-medium text-emerald-500 tracking-wide">BENTO Personal OS</p>
+            <p className="text-xs font-medium text-accent tracking-wide">BENTO Personal OS</p>
             <h1 className="text-2xl font-bold tracking-tight mt-1 text-balance">
               Your Life. One Place.
             </h1>
@@ -140,13 +140,13 @@ export const OnboardingModal: React.FC = () => {
 
         <div className="mt-6 pt-4 border-t bento-divider flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-            <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+            <ShieldCheck className="w-4 h-4 text-accent shrink-0" />
             <span>No account required · Offline-first storage</span>
           </div>
           <button
             type="button"
             onClick={() => handleComplete(false)}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors whitespace-nowrap shrink-0"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-sm font-semibold transition-colors whitespace-nowrap shrink-0"
           >
             Enter BENTO
             <ArrowRight className="w-4 h-4" />

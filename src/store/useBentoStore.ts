@@ -122,6 +122,7 @@ export interface BentoState extends BentoDatabaseSnapshot {
 
   // Daily — Routines
   addRoutine: (data: Omit<Routine, 'id' | 'completionLogs' | 'createdAt' | 'updatedAt'>) => Routine;
+  updateRoutine: (id: string, updates: Partial<Routine>) => void;
   toggleRoutineStep: (routineId: string, date: string, stepId: string) => void;
   deleteRoutine: (id: string) => void;
 
@@ -158,6 +159,7 @@ export interface BentoState extends BentoDatabaseSnapshot {
 
   // Life
   addJournalEntry: (data: Omit<JournalEntry, 'id' | 'createdAt' | 'updatedAt'>) => JournalEntry;
+  updateJournalEntry: (id: string, updates: Partial<JournalEntry>) => void;
   deleteJournalEntry: (id: string) => void;
   addMemory: (data: Omit<MemoryItem, 'id' | 'createdAt' | 'updatedAt'>) => MemoryItem;
   deleteMemory: (id: string) => void;
@@ -555,6 +557,12 @@ export const useBentoStore = create<BentoState>((set, get) => ({
     schedulePersist(get);
     return r;
   },
+  updateRoutine: (id, updates) => {
+    set((s) => ({
+      routines: s.routines.map((r) => (r.id === id ? { ...r, ...updates, updatedAt: nowIso() } : r)),
+    }));
+    schedulePersist(get);
+  },
   toggleRoutineStep: (routineId, date, stepId) => {
     set((s) => ({
       routines: s.routines.map((r) => {
@@ -736,6 +744,14 @@ export const useBentoStore = create<BentoState>((set, get) => ({
     set((s) => ({ journalEntries: [entry, ...s.journalEntries] }));
     schedulePersist(get);
     return entry;
+  },
+  updateJournalEntry: (id, updates) => {
+    set((s) => ({
+      journalEntries: s.journalEntries.map((j) =>
+        j.id === id ? { ...j, ...updates, updatedAt: nowIso() } : j
+      ),
+    }));
+    schedulePersist(get);
   },
   deleteJournalEntry: (id) => {
     set((s) => ({ journalEntries: s.journalEntries.filter((j) => j.id !== id) }));

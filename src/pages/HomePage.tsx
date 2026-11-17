@@ -126,7 +126,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
             <button
               type="button"
               onClick={() => store.setActiveSection('daily')}
-              className="inline-flex items-center gap-1 text-xs font-medium text-emerald-500 hover:underline whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline whitespace-nowrap shrink-0"
             >
               <span>Open Daily</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -139,7 +139,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
               <button
                 type="button"
                 onClick={onOpenQuickAdd}
-                className="text-xs font-semibold text-emerald-500 hover:underline whitespace-nowrap"
+                className="text-xs font-semibold text-accent hover:underline whitespace-nowrap"
               >
                 Add task
               </button>
@@ -189,7 +189,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
             <button
               type="button"
               onClick={() => store.setActiveSection('money')}
-              className="inline-flex items-center gap-1 text-xs font-medium text-emerald-500 hover:underline whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline whitespace-nowrap shrink-0"
             >
               <span>Open Money</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -239,7 +239,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
             <button
               type="button"
               onClick={() => store.setActiveSection('goals')}
-              className="text-xs font-medium text-emerald-500 hover:underline whitespace-nowrap shrink-0"
+              className="text-xs font-medium text-accent hover:underline whitespace-nowrap shrink-0"
             >
               All Habits
             </button>
@@ -266,7 +266,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
                       <span
                         className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 ${
                           done
-                            ? 'bg-emerald-600 border-emerald-600 text-white'
+                            ? 'bg-accent border-accent'
                             : 'border-[var(--border-strong)]'
                         }`}
                       >
@@ -299,7 +299,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
             <button
               type="button"
               onClick={() => store.setActiveSection('goals')}
-              className="text-xs font-medium text-emerald-500 hover:underline whitespace-nowrap shrink-0"
+              className="text-xs font-medium text-accent hover:underline whitespace-nowrap shrink-0"
             >
               Manage
             </button>
@@ -352,7 +352,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
             <button
               type="button"
               onClick={() => store.setActiveSection('goals')}
-              className="text-xs font-medium text-emerald-500 hover:underline whitespace-nowrap shrink-0"
+              className="text-xs font-medium text-accent hover:underline whitespace-nowrap shrink-0"
             >
               Open
             </button>
@@ -391,7 +391,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
             <button
               type="button"
               onClick={() => store.setActiveSection('more')}
-              className="text-xs font-medium text-emerald-500 hover:underline whitespace-nowrap shrink-0"
+              className="text-xs font-medium text-accent hover:underline whitespace-nowrap shrink-0"
             >
               Reviews
             </button>
@@ -433,7 +433,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
           <button
             type="button"
             onClick={() => store.setActiveSection('more')}
-            className="text-xs font-medium text-emerald-500 hover:underline whitespace-nowrap shrink-0"
+            className="text-xs font-medium text-accent hover:underline whitespace-nowrap shrink-0"
           >
             Methodology
           </button>
@@ -450,7 +450,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
         ) : (
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-2 border-t bento-divider">
             <div className="shrink-0">
-              <span className="text-3xl font-extrabold font-mono-num text-emerald-500">
+              <span className="text-3xl font-extrabold font-mono-num text-accent">
                 {bentoScore.overallScore}
               </span>
               <span className="text-xs text-[var(--text-muted)] ml-1">/ 100</span>
@@ -494,7 +494,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
             onClick={onOpenAssistant}
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-hairline)] hover:bg-[var(--bg-hover)] text-xs font-semibold whitespace-nowrap shrink-0 transition-colors"
           >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+            <Sparkles className="w-3.5 h-3.5 text-accent" />
             <span>Tell BENTO...</span>
           </button>
           <button
@@ -502,7 +502,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
             onClick={() => setCustomizing((v) => !v)}
             className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-medium whitespace-nowrap shrink-0 transition-colors ${
               customizing
-                ? 'bg-emerald-600 border-emerald-600 text-white'
+                ? 'bg-accent border-accent'
                 : 'bg-[var(--bg-surface)] border-[var(--border-hairline)] hover:bg-[var(--bg-hover)]'
             }`}
           >
@@ -512,7 +512,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
           <button
             type="button"
             onClick={onOpenQuickAdd}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold whitespace-nowrap shrink-0 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent text-xs font-semibold whitespace-nowrap shrink-0 transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Quick Add</span>
@@ -599,7 +599,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onOpenQuickAdd, onOpenAssist
                     className="p-1.5 rounded-lg hover:bg-[var(--bg-hover)]"
                   >
                     {card.visible ? (
-                      <Eye className="w-3.5 h-3.5 text-emerald-500" />
+                      <Eye className="w-3.5 h-3.5 text-accent" />
                     ) : (
                       <EyeOff className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                     )}

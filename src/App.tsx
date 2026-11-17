@@ -65,14 +65,17 @@ export default function App() {
   }, [store.settings.theme]);
 
   useEffect(() => {
-    const map: Record<string, string> = {
-      emerald: '#10b981',
-      violet: '#8b5cf6',
-      champagne: '#d4a053',
-      sky: '#3b82f6',
-      rose: '#f43f5e',
+    const map: Record<string, { primary: string; hover: string; soft: string }> = {
+      emerald: { primary: '#10b981', hover: '#059669', soft: 'rgba(16, 185, 129, 0.14)' },
+      violet: { primary: '#8b5cf6', hover: '#7c3aed', soft: 'rgba(139, 92, 246, 0.14)' },
+      champagne: { primary: '#d4a053', hover: '#b88435', soft: 'rgba(212, 160, 83, 0.16)' },
+      sky: { primary: '#3b82f6', hover: '#2563eb', soft: 'rgba(59, 130, 246, 0.14)' },
+      rose: { primary: '#f43f5e', hover: '#e11d48', soft: 'rgba(244, 63, 94, 0.14)' },
     };
-    document.documentElement.style.setProperty('--accent-primary', map[store.settings.accent] || '#10b981');
+    const chosen = map[store.settings.accent] || map.emerald;
+    document.documentElement.style.setProperty('--accent-primary', chosen.primary);
+    document.documentElement.style.setProperty('--accent-hover', chosen.hover);
+    document.documentElement.style.setProperty('--accent-soft', chosen.soft);
   }, [store.settings.accent]);
 
   // Keyboard command shortcuts
@@ -125,7 +128,7 @@ export default function App() {
             <button
               type="button"
               onClick={() => setQuickAddOpen(true)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-accent text-xs font-semibold transition-colors"
             >
               <Plus className="w-4 h-4" />
               <span>Quick Add</span>
@@ -136,7 +139,7 @@ export default function App() {
               className="w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl bg-[var(--bg-elevated)] hover:bg-[var(--bg-hover)] border border-[var(--border-hairline)] text-xs font-medium transition-colors"
             >
               <span className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+                <Sparkles className="w-3.5 h-3.5 text-accent" />
                 <span>Tell BENTO...</span>
               </span>
               <span className="text-[10px] font-mono-num text-[var(--text-muted)]">⌘J</span>
@@ -165,7 +168,7 @@ export default function App() {
                   onClick={() => store.setActiveSection(item.id)}
                   className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                     active
-                      ? 'bg-[var(--accent-soft)] text-emerald-500 font-semibold'
+                      ? 'bg-accent-soft text-accent font-semibold'
                       : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -185,10 +188,10 @@ export default function App() {
         </div>
       </aside>
 
-      {/* Mobile Compact Header (52px) */}
-      <header className="lg:hidden sticky top-0 z-30 h-[52px] px-4 flex items-center justify-between gap-3 bg-[var(--bg-surface)]/95 backdrop-blur-md border-b bento-divider">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <BentoBrandMark size={30} />
+      {/* Mobile Compact Header (48px) */}
+      <header className="lg:hidden sticky top-0 z-30 h-12 px-3.5 flex items-center justify-between gap-2 bg-[var(--bg-surface)]/95 backdrop-blur-md border-b bento-divider">
+        <div className="flex items-center gap-2 min-w-0">
+          <BentoBrandMark size={28} />
           <span className="text-sm font-extrabold tracking-tight font-display whitespace-nowrap">BENTO</span>
         </div>
         <div className="flex items-center gap-1">
@@ -205,7 +208,7 @@ export default function App() {
             type="button"
             onClick={() => openAssistantWith(undefined)}
             aria-label="Tell BENTO"
-            className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl hover:bg-[var(--bg-hover)] text-emerald-500"
+            className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl hover:bg-[var(--bg-hover)] text-accent"
           >
             <Sparkles className="w-4 h-4" />
           </button>
@@ -213,7 +216,7 @@ export default function App() {
             type="button"
             onClick={() => setQuickAddOpen(true)}
             aria-label="Quick Add"
-            className="min-h-[36px] px-3 flex items-center justify-center gap-1 rounded-xl bg-emerald-600 text-white text-xs font-semibold"
+            className="min-h-[36px] px-3 flex items-center justify-center gap-1 rounded-xl bg-accent text-xs font-semibold"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add</span>
@@ -222,7 +225,7 @@ export default function App() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-10 max-w-7xl w-full mx-auto">
+      <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-6 pb-20 lg:pb-10 max-w-7xl w-full mx-auto">
         {store.activeSection === 'home' && (
           <HomePage
             onOpenQuickAdd={() => setQuickAddOpen(true)}
@@ -236,8 +239,8 @@ export default function App() {
         {store.activeSection === 'more' && <MorePage />}
       </main>
 
-      {/* Mobile Bottom Thumb-Zone Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 h-16 bg-[var(--bg-surface)]/95 backdrop-blur-md border-t bento-divider grid grid-cols-6 items-center">
+      {/* Mobile Bottom Thumb-Zone Navigation (56px) */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 h-14 bg-[var(--bg-surface)]/95 backdrop-blur-md border-t bento-divider grid grid-cols-6 items-center">
         {PRIMARY_NAV.map((item) => {
           const Icon = item.icon;
           const active = store.activeSection === item.id;
@@ -246,11 +249,11 @@ export default function App() {
               key={item.id}
               type="button"
               onClick={() => store.setActiveSection(item.id)}
-              className={`min-h-[48px] flex flex-col items-center justify-center gap-1 transition-colors ${
-                active ? 'text-emerald-500' : 'text-[var(--text-secondary)]'
+              className={`min-h-[44px] flex flex-col items-center justify-center gap-0.5 transition-colors ${
+                active ? 'text-accent' : 'text-[var(--text-secondary)]'
               }`}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-4 h-4" />
               <span className="text-[10px] font-medium tracking-tight">{item.label}</span>
             </button>
           );

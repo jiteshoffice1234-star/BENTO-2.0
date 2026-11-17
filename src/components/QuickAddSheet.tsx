@@ -310,19 +310,19 @@ export const QuickAddSheet: React.FC<QuickAddSheetProps> = ({ isOpen, onClose, o
         <form onSubmit={handleNLSubmit} className="px-5 pt-4 pb-3 border-b bento-divider bg-[var(--bg-elevated)]/50">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
-              <Sparkles className="w-4 h-4 text-emerald-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Sparkles className="w-4 h-4 text-accent absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={nlInput}
                 onChange={(e) => setNlInput(e.target.value)}
                 placeholder="Tell BENTO in plain language..."
-                className="w-full rounded-xl bg-[var(--bg-surface)] border border-[var(--border-hairline)] pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full rounded-xl bg-[var(--bg-surface)] border border-[var(--border-hairline)] pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-accent"
               />
             </div>
             <button
               type="submit"
               disabled={!nlInput.trim()}
-              className="px-4 py-2.5 rounded-xl bg-emerald-600 disabled:opacity-40 hover:bg-emerald-500 text-white text-xs font-semibold whitespace-nowrap shrink-0"
+              className="px-4 py-2.5 rounded-xl bg-accent disabled:opacity-40 text-xs font-semibold whitespace-nowrap shrink-0"
             >
               Parse
             </button>
@@ -344,7 +344,7 @@ export const QuickAddSheet: React.FC<QuickAddSheetProps> = ({ isOpen, onClose, o
               }}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap shrink-0 transition-colors ${
                 mode === m.id
-                  ? 'bg-emerald-600 text-white'
+                  ? 'bg-accent'
                   : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -439,18 +439,45 @@ export const QuickAddSheet: React.FC<QuickAddSheetProps> = ({ isOpen, onClose, o
                   <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
                     To Account
                   </label>
-                  <select
-                    value={toAccountId}
-                    onChange={(e) => setToAccountId(e.target.value)}
-                    className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3.5 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
-                  >
-                    <option value="">Select destination...</option>
-                    {store.accounts.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.name}
-                      </option>
-                    ))}
-                  </select>
+                  {store.accounts.length < 2 ? (
+                    <div className="flex items-center justify-between gap-2 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-xs">
+                      <span className="text-[var(--text-secondary)]">Need a 2nd account</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const firstId = ensureDefaultAccount();
+                          const created = store.addAccount({
+                            name: 'Savings Bank',
+                            institution: 'Bank',
+                            type: 'savings',
+                            openingBalanceMinor: 0,
+                            currency: store.settings.currency,
+                            color: '#3b82f6',
+                            notes: 'Created for transfer',
+                            active: true,
+                          });
+                          setAccountId(firstId);
+                          setToAccountId(created.id);
+                        }}
+                        className="text-accent font-semibold hover:underline shrink-0"
+                      >
+                        + Create 2nd
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      value={toAccountId}
+                      onChange={(e) => setToAccountId(e.target.value)}
+                      className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3.5 py-2.5 text-sm focus:outline-none focus:border-accent"
+                    >
+                      <option value="">Select destination...</option>
+                      {store.accounts.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               )}
             </div>
@@ -560,7 +587,7 @@ export const QuickAddSheet: React.FC<QuickAddSheetProps> = ({ isOpen, onClose, o
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors"
+              className="px-5 py-2.5 rounded-xl bg-accent text-xs font-semibold transition-colors"
             >
               Save {CAPTURE_MODES.find((c) => c.id === mode)?.label}
             </button>

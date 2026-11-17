@@ -214,7 +214,7 @@ export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, initialP
 
         <div className="flex items-center justify-between px-5 py-4 border-b bento-divider">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-accent-soft text-accent flex items-center justify-center">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
@@ -243,11 +243,11 @@ export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, initialP
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder='Try "Spent 450 on dinner today" or "How much money do I have?"'
-              className="flex-1 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-4 py-3 text-sm focus:outline-none focus:border-emerald-500"
+              className="flex-1 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-4 py-3 text-sm focus:outline-none focus:border-accent"
             />
             <button
               type="submit"
-              className="min-h-[44px] px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold inline-flex items-center gap-1.5 shrink-0"
+              className="min-h-[44px] px-4 rounded-xl bg-accent text-sm font-semibold inline-flex items-center gap-1.5 shrink-0"
             >
               <Send className="w-4 h-4" />
               <span>Run</span>
@@ -259,7 +259,7 @@ export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, initialP
             <div className="bento-elevated rounded-2xl p-4 space-y-4">
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-xs text-emerald-500 font-medium">
+                  <p className="text-xs text-accent font-medium">
                     {proposal.module} · {proposal.confidence} confidence · {proposal.layer}
                   </p>
                   <h3 className="text-sm font-bold mt-0.5">{proposal.summary}</h3>
@@ -279,7 +279,7 @@ export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, initialP
                         store.setActiveSection(proposal.answerRoute!);
                         onClose();
                       }}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-500 hover:underline"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent hover:underline"
                     >
                       <span>Open {proposal.module}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -430,7 +430,7 @@ export const AssistantModal: React.FC<AssistantModalProps> = ({ isOpen, initialP
                         type="button"
                         onClick={handleConfirmProposal}
                         disabled={proposal.kind === 'create_transaction' && toMinor(editAmount) <= 0}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 disabled:opacity-40 hover:bg-emerald-500 text-white text-xs font-semibold"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent disabled:opacity-40 text-xs font-semibold"
                       >
                         <Check className="w-3.5 h-3.5" />
                         <span>Confirm & Save</span>
