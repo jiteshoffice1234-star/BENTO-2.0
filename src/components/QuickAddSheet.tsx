@@ -331,7 +331,7 @@ export const QuickAddSheet: React.FC<QuickAddSheetProps> = ({ isOpen, onClose, o
         </form>
 
         {/* Mode Selector */}
-        <div className="px-5 py-3 border-b bento-divider flex items-center gap-1.5 overflow-x-auto bento-scroll">
+        <div className="px-5 py-3 border-b bento-divider flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           {CAPTURE_MODES.map((m) => (
             <button
               key={m.id}

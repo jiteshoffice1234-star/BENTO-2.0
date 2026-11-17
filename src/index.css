@@ -2,24 +2,29 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg-canvas: #f6f7f9;
+  color-scheme: light;
+  --bg-canvas: #f4f6fa;
   --bg-surface: #ffffff;
-  --bg-elevated: #f0f2f6;
-  --bg-hover: #e7eaf0;
-  --border-hairline: rgba(15, 23, 42, 0.09);
-  --border-strong: rgba(15, 23, 42, 0.16);
+  --bg-elevated: #eef1f7;
+  --bg-hover: #e3e8f1;
+  --border-hairline: rgba(15, 23, 42, 0.10);
+  --border-strong: rgba(15, 23, 42, 0.20);
   --text-primary: #0f172a;
-  --text-secondary: #475569;
+  --text-secondary: #44536b;
   --text-muted: #64748b;
-  --accent-primary: #059669;
-  --accent-hover: #047857;
+  --accent-primary: #047857;
+  --accent-hover: #036347;
   --accent-primary-fg: #ffffff;
-  --accent-soft: rgba(5, 150, 105, 0.12);
+  --accent-soft: rgba(4, 120, 87, 0.12);
   --accent-violet: #7c3aed;
-  --accent-champagne: #b88435;
+  --accent-champagne: #a9741f;
+  --shadow-surface: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px -12px rgba(15, 23, 42, 0.12);
+  --chart-grid: rgba(15, 23, 42, 0.10);
+  --chart-axis: #64748b;
 }
 
 .dark {
+  color-scheme: dark;
   --bg-canvas: #090a0d;
   --bg-surface: #111318;
   --bg-elevated: #171a21;
@@ -31,10 +36,13 @@
   --text-muted: #70788c;
   --accent-primary: #10b981;
   --accent-hover: #059669;
-  --accent-primary-fg: #ffffff;
+  --accent-primary-fg: #04211a;
   --accent-soft: rgba(16, 185, 129, 0.14);
   --accent-violet: #8b5cf6;
   --accent-champagne: #d4a053;
+  --shadow-surface: none;
+  --chart-grid: rgba(148, 163, 184, 0.16);
+  --chart-axis: #94a3b8;
 }
 
 @layer base {
@@ -43,6 +51,11 @@
     background-color: var(--bg-canvas);
     color: var(--text-primary);
     -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
   }
 
   h1, h2, h3, h4, .font-display {
@@ -66,6 +79,7 @@
 .bento-surface {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-hairline);
+  box-shadow: var(--shadow-surface);
 }
 
 .bento-elevated {
@@ -96,6 +110,18 @@
 
 .border-accent {
   border-color: var(--accent-primary);
+}
+
+/* Horizontal tab rows: swipeable but without a visible scrollbar track. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .bento-scroll::-webkit-scrollbar {

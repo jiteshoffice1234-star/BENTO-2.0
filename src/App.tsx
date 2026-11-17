@@ -5,9 +5,11 @@ import {
   Home,
   LayoutGrid,
   Lightbulb,
+  Moon,
   Plus,
   Search,
   Sparkles,
+  Sun,
   Target,
   Wallet,
 } from 'lucide-react';
@@ -44,6 +46,7 @@ export default function App() {
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [assistantPrefill, setAssistantPrefill] = useState<string | undefined>(undefined);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(true);
 
   useEffect(() => {
     void store.hydrate();
@@ -56,6 +59,7 @@ export default function App() {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const isDark = mode === 'dark' || (mode === 'system' && prefersDark);
       document.documentElement.classList.toggle('dark', isDark);
+      setIsDarkTheme(isDark);
       const metaTheme = document.querySelector('meta[name="theme-color"]');
       if (metaTheme) {
         metaTheme.setAttribute('content', isDark ? '#090A0D' : '#F6F7F9');
@@ -108,6 +112,12 @@ export default function App() {
       </div>
     );
   }
+
+  const toggleTheme = () => {
+    store.updateSettings({ theme: isDarkTheme ? 'light' : 'dark' });
+  };
+
+  const themeToggleLabel = isDarkTheme ? 'Switch to light theme' : 'Switch to dark theme';
 
   const openAssistantWith = (prefill?: string) => {
     setAssistantPrefill(prefill);
@@ -184,6 +194,20 @@ export default function App() {
         </div>
 
         <div className="space-y-2 pt-4 border-t bento-divider">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={themeToggleLabel}
+            className="w-full flex items-center justify-between py-2 px-3 rounded-xl hover:bg-[var(--bg-hover)] text-xs text-[var(--text-secondary)] transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              {isDarkTheme ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
+              <span>{isDarkTheme ? 'Dark theme' : 'Light theme'}</span>
+            </span>
+            <span className="text-[10px] uppercase tracking-wide text-[var(--text-muted)]">
+              Switch
+            </span>
+          </button>
           <PWAInstallButton />
           <p className="text-[11px] text-[var(--text-muted)] px-2">
             Local-first · Offline ready
@@ -198,6 +222,14 @@ export default function App() {
           <span className="text-sm font-extrabold tracking-tight font-display whitespace-nowrap">BENTO</span>
         </div>
         <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={themeToggleLabel}
+            className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-xl hover:bg-[var(--bg-hover)]"
+          >
+            {isDarkTheme ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <PWAInstallButton />
           <button
             type="button"

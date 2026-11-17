@@ -114,7 +114,7 @@ export const LifePage: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
         {(
           [
             { id: 'journal', label: `Journal (${store.journalEntries.length})` },

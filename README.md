@@ -104,7 +104,8 @@ Request board: https://github.com/jiteshoffice1234-star/BENTO-2.0/issues?q=label
 
 ## Android APK
 
-The latest build is committed at [`builds/bento-2.0-android-debug.apk`](builds/bento-2.0-android-debug.apk).
+The latest build is committed at [`builds/bento-2.1.0-android-debug.apk`](builds/bento-2.1.0-android-debug.apk)
+and attached to the [latest GitHub release](../../releases/latest).
 
 To rebuild it yourself:
 

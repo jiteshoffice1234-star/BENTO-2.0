@@ -390,7 +390,7 @@ export const MoneyPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 overflow-x-auto bento-scroll pb-1">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -458,9 +458,9 @@ export const MoneyPage: React.FC = () => {
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={cashflowSeries}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.15)" />
-                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#94a3b8' }} />
-                    <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'var(--chart-axis)' }} />
+                    <YAxis tick={{ fontSize: 11, fill: 'var(--chart-axis)' }} />
                     <Tooltip
                       formatter={(value) => formatMoney(toMinor(Number(value)), cur)}
                       contentStyle={{

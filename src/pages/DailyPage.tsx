@@ -238,7 +238,7 @@ export const DailyPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
         {(
           [
             { id: 'tasks', label: `Tasks (${activeTasks.filter((t) => t.status !== 'completed' && t.status !== 'cancelled').length})` },
@@ -267,7 +267,7 @@ export const DailyPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           <div className="bento-surface rounded-2xl p-5 lg:col-span-8 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-1.5 overflow-x-auto bento-scroll">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
                 {(
                   ['today', 'tomorrow', 'upcoming', 'overdue', 'priority', 'inbox', 'completed', 'all'] as TaskViewFilter[]
                 ).map((f) => (

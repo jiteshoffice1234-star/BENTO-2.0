@@ -154,7 +154,7 @@ export const MorePage: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
         {(
           [
             { id: 'reviews', label: 'Reviews & Insights' },
@@ -732,7 +732,7 @@ export const MorePage: React.FC = () => {
           <div className="pt-4 border-t bento-divider flex flex-wrap items-center justify-between gap-4">
             <div className="text-xs text-[var(--text-secondary)]">
               <p className="font-semibold text-[var(--text-primary)]">About BENTO</p>
-              <p>Version 3.0.0 · Local-first Personal Operating System · IndexedDB + Offline PWA</p>
+              <p>Version 2.1.0 · Local-first Personal Operating System · IndexedDB + Offline PWA</p>
             </div>
 
             {!confirmReset ? (
