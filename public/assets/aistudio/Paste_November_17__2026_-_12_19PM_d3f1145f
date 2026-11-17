@@ -1,0 +1,1323 @@
+# BENTO — MASTER APPLICATION BUILD PROMPT
+## Personal Finance, Daily Life & Productivity Operating System
+
+**Project name:** BENTO  
+**Tagline:** Your Life. One Place.  
+**Platform:** Android (first priority)  
+**Product philosophy:** Local-first · Offline-first · Private · Intelligent · Personal
+
+---
+
+# 1. PRODUCT VISION
+
+Build BENTO, a premium personal operating system that combines personal finance, daily planning, habits, goals, career, learning, health tracking and personal life management into one cohesive application.
+
+BENTO is not simply a finance tracker, habit tracker, to-do list or notes application.
+
+It is a unified system that helps users:
+- Understand their financial position.
+- Organize their daily life.
+- Track habits and routines.
+- Set and achieve personal goals.
+- Monitor career and learning progress.
+- Record important life events.
+- Analyze their progress over time.
+- Make better decisions using personal data.
+
+Everything must work together.
+
+**Core philosophy:**
+
+"Capture anything. Organize everything. Understand your life."
+
+The application must be genuinely usable without internet access. Do not make cloud services, accounts, subscriptions or external AI APIs prerequisites for core functionality.
+
+# 2. TECHNOLOGY STACK
+
+Use a modern, maintainable Flutter architecture.
+
+| Layer | Technology |
+|---|---|
+| Application | Flutter |
+| Language | Dart |
+| State management | Riverpod |
+| Navigation | GoRouter |
+| Local database | SQLite + Drift |
+| Data models | Freezed + JSON serialization |
+| Charts | fl_chart |
+| Local preferences | SharedPreferences |
+| Secure storage | Flutter Secure Storage |
+| Biometric security | Local authentication |
+| Notifications | Flutter Local Notifications |
+| Background tasks | Workmanager where supported |
+| File handling | Native Android integrations |
+| Animations | Flutter animations |
+| Testing | Flutter Test + Integration Test |
+
+Use current stable, mutually compatible package versions.
+
+Architecture:
+- Feature-first modular architecture.
+- Clean Architecture.
+- Repository pattern.
+- Dependency injection.
+- Separation of business logic and presentation.
+- Strong typing.
+- Database migrations.
+- Centralized error handling.
+
+Avoid unnecessary packages and dependencies.
+
+# 3. APPLICATION STRUCTURE
+
+Create these primary navigation destinations:
+
+1. Home
+2. Money
+3. Daily
+4. Goals
+5. Life
+6. More
+
+Career, Learning, Habits, Health, Journal, Analytics and Settings should be accessible through relevant sections.
+
+Add a persistent global Quick Add action and a BENTO Assistant entry point.
+
+Navigation must be intuitive, consistent and optimized for one-handed Android use.
+
+# 4. HOME — PERSONAL DASHBOARD
+
+Create an intelligent, customizable dashboard.
+
+The home screen should provide an overview of the user's entire life.
+
+### Dashboard components
+
+**A. Greeting**
+- Time-based greeting.
+- Current date and day.
+- Optional personalized message.
+
+**B. Daily Overview**
+- Tasks completed.
+- Pending tasks.
+- Today's schedule.
+- Upcoming reminders.
+- Habit completion.
+
+**C. Financial Snapshot**
+- Total available balance.
+- Income this month.
+- Expenses this month.
+- Savings this month.
+- Budget utilization.
+
+**D. Goals**
+- Active goals.
+- Progress indicators.
+- Upcoming milestones.
+
+**E. Habits**
+- Today's habit checklist.
+- Current streaks.
+- Weekly completion.
+
+**F. Career & Learning**
+- Learning hours.
+- Active courses.
+- Skill progress.
+- Job application activity.
+
+**G. BENTO Insights**
+- Spending patterns.
+- Productivity trends.
+- Goal progress.
+- Missed routines.
+- Meaningful achievements.
+
+### Dashboard customization
+
+Allow users to:
+- Rearrange cards.
+- Hide or show cards.
+- Change card sizes where appropriate.
+- Select their preferred dashboard layout.
+- Reset to the default layout.
+
+Save dashboard preferences locally.
+
+Do not overload the home screen. Use progressive disclosure and expandable cards.
+
+# 5. MONEY — COMPLETE PERSONAL FINANCE MANAGER
+
+Build a comprehensive personal finance management system.
+
+### 5.1 Accounts
+
+Support:
+- Savings accounts.
+- Current accounts.
+- Cash.
+- Wallets.
+- Credit cards.
+- Other custom accounts.
+
+Account fields:
+- Name.
+- Institution.
+- Account type.
+- Opening balance.
+- Current balance.
+- Currency.
+- Account color.
+- Notes.
+- Active/inactive status.
+
+Allow multiple accounts and transfers.
+
+Never count transfers between owned accounts as income or expenses.
+
+### 5.2 Transactions
+
+Support:
+- Income.
+- Expense.
+- Transfers.
+- Refunds.
+- Adjustments.
+
+Transaction fields:
+- Amount.
+- Type.
+- Category.
+- Subcategory.
+- Account.
+- Date and time.
+- Merchant.
+- Description.
+- Tags.
+- Notes.
+- Recurring status.
+- Attachment reference.
+- Creation timestamp.
+- Modification timestamp.
+
+Features:
+- Add, edit, delete and duplicate.
+- Search and filter.
+- Category-wise analysis.
+- Account-wise analysis.
+- Date range filters.
+- Transaction history.
+- Bulk categorization.
+- CSV import and export.
+
+### 5.3 Categories
+
+Provide customizable default categories.
+
+Expenses:
+- Food.
+- Transport.
+- Shopping.
+- Rent.
+- Utilities.
+- Entertainment.
+- Healthcare.
+- Education.
+- Travel.
+- Personal care.
+- Subscriptions.
+- Other.
+
+Income:
+- Salary.
+- Freelance.
+- Business.
+- Interest.
+- Investment returns.
+- Gifts.
+- Other.
+
+Allow custom categories, subcategories and icons.
+
+### 5.4 Budgets
+
+- Monthly budgets.
+- Weekly budgets.
+- Category budgets.
+- Custom-period budgets.
+- Spending limits.
+- Remaining budget.
+- Budget utilization.
+- Warning thresholds.
+- Historical comparison.
+
+### 5.5 Savings
+
+- Savings accounts.
+- Savings targets.
+- Monthly contributions.
+- Savings progress.
+- Emergency fund tracker.
+- Savings history.
+
+### 5.6 Investments
+
+Provide manual investment tracking:
+- Stocks.
+- Mutual funds.
+- Fixed deposits.
+- Gold.
+- Other assets.
+
+Fields:
+- Investment name.
+- Investment type.
+- Invested amount.
+- Current valuation.
+- Purchase date.
+- Quantity, where applicable.
+- Notes.
+
+Never pretend to provide live market prices while offline. Manual valuations must be clearly identified.
+
+### 5.7 Debt and Credit
+
+- Loans.
+- EMIs.
+- Credit card outstanding.
+- Borrowed money.
+- Money lent to others.
+- Repayment records.
+- Due dates.
+- Remaining balance.
+
+### 5.8 Bills and Subscriptions
+
+- Recurring bills.
+- Subscription tracking.
+- Due dates.
+- Payment status.
+- Renewal reminders.
+- Frequency.
+- Amount.
+
+### 5.9 Financial Analytics
+
+Provide:
+- Monthly income vs expense.
+- Expense breakdown.
+- Savings rate.
+- Spending trends.
+- Budget performance.
+- Account balances.
+- Net worth.
+- Debt overview.
+- Month-over-month comparison.
+
+All calculations must use actual stored transactions and correct accounting rules.
+
+Default currency: INR (₹). Allow changing currency and locale.
+
+# 6. DAILY — PERSONAL PLANNING SYSTEM
+
+Build a complete daily management system.
+
+### Tasks
+
+Fields:
+- Title.
+- Description.
+- Priority.
+- Status.
+- Due date.
+- Due time.
+- Start date.
+- Category.
+- Tags.
+- Reminder.
+- Recurrence.
+- Linked goal.
+- Notes.
+
+Statuses:
+- Inbox.
+- Upcoming.
+- In progress.
+- Completed.
+- Cancelled.
+
+Features:
+- Today.
+- Tomorrow.
+- Upcoming.
+- Overdue.
+- Completed.
+- Calendar view.
+- List view.
+- Priority view.
+- Search and filters.
+
+### Calendar
+
+Provide:
+- Daily view.
+- Weekly view.
+- Monthly view.
+- Events.
+- Deadlines.
+- Tasks.
+- Reminders.
+
+### Routines
+
+Allow users to create:
+- Morning routines.
+- Evening routines.
+- Work routines.
+- Study routines.
+- Custom routines.
+
+Allow individual steps, schedules and completion tracking.
+
+### Notes
+
+Provide quick notes, pinned notes, categories and search.
+
+# 7. HABITS — BEHAVIOR TRACKER
+
+Build a flexible habit tracking system.
+
+Habit types:
+- Positive habits.
+- Negative habits.
+- Quantitative habits.
+- Time-based habits.
+- Checklist habits.
+
+Examples:
+- Exercise.
+- Reading.
+- Studying.
+- Drinking water.
+- Sleeping on time.
+- Avoiding unnecessary spending.
+
+Habit configuration:
+- Name.
+- Description.
+- Icon.
+- Color.
+- Frequency.
+- Target.
+- Reminder.
+- Start date.
+- End date.
+- Category.
+
+Analytics:
+- Current streak.
+- Best streak.
+- Completion percentage.
+- Weekly consistency.
+- Monthly consistency.
+- Historical calendar.
+- Missed days.
+
+Do not treat a missed day as an automatic failure of the entire habit.
+
+Support flexible schedules, rest days and skipped days.
+
+# 8. GOALS — PERSONAL ACHIEVEMENT SYSTEM
+
+Allow users to create goals across different areas.
+
+Goal categories:
+- Financial.
+- Career.
+- Education.
+- Health.
+- Personal.
+- Lifestyle.
+- Custom.
+
+Goal fields:
+- Title.
+- Description.
+- Target.
+- Current progress.
+- Start date.
+- Deadline.
+- Priority.
+- Status.
+- Milestones.
+- Linked activities.
+
+Goal types:
+- Numeric goals.
+- Financial goals.
+- Completion goals.
+- Habit-based goals.
+- Custom goals.
+
+Features:
+- Milestone tracking.
+- Progress visualization.
+- Deadline reminders.
+- Goal history.
+- Goal completion.
+- Archived goals.
+
+Goals should connect to tasks, habits, learning and savings without duplicating data.
+
+# 9. CAREER & LEARNING
+
+### Career
+
+Build a personal career management system.
+
+Features:
+- Career profile.
+- Work experience.
+- Skills.
+- Certifications.
+- Career goals.
+- Job applications.
+- Interview tracking.
+- Company details.
+- Salary expectations.
+- Application status.
+- Follow-up reminders.
+- Notes.
+
+Job application statuses:
+- Interested.
+- Applied.
+- Assessment.
+- Interview.
+- Offer.
+- Rejected.
+- Withdrawn.
+
+### Learning
+
+Support:
+- Courses.
+- Subjects.
+- Topics.
+- Skills.
+- Study sessions.
+- Learning hours.
+- Progress tracking.
+- Study notes.
+- Resources.
+- Learning goals.
+
+Provide:
+- Weekly study statistics.
+- Monthly learning hours.
+- Skill progress.
+- Course completion.
+- Learning consistency.
+
+# 10. LIFE — PERSONAL MANAGEMENT
+
+Build a flexible personal information space.
+
+### Journal
+- Daily entries.
+- Rich text or Markdown.
+- Mood tracking (optional).
+- Tags.
+- Search.
+- Date-based history.
+
+### Memories
+- Important events.
+- Achievements.
+- Trips.
+- Personal milestones.
+- Photos and attachments.
+
+### Wishlist
+- Item name.
+- Price.
+- Priority.
+- Category.
+- Purchase link.
+- Target purchase date.
+- Purchase status.
+- Linked savings goal.
+
+### Health & Lifestyle
+Optional manual tracking:
+- Sleep.
+- Exercise.
+- Water.
+- Weight.
+- Walking/activity.
+- Custom measurements.
+
+Keep health tracking optional and private.
+
+### Personal Vault
+Store references, personal notes and important information securely.
+
+Do not store passwords, card security codes or sensitive authentication credentials in ordinary records.
+
+# 11. BENTO ASSISTANT — NATURAL LANGUAGE ENGINE
+
+This is one of the most important features.
+
+Create a global assistant called **"Tell BENTO..."**
+
+It must accept normal conversational language.
+
+Examples:
+
+"Spent 450 on dinner today."
+
+"Received salary of 20000 in my bank account."
+
+"Tomorrow at 7 PM remind me to study Excel."
+
+"Create a goal to save 50000."
+
+"I studied accounting for 45 minutes."
+
+"Show my food expenses this month."
+
+"How much money do I have?"
+
+"Summarize my week."
+
+### Assistant capabilities
+
+1. Understand user intent.
+2. Extract relevant entities.
+3. Identify the correct module.
+4. Convert natural language into structured data.
+5. Preview proposed changes.
+6. Request confirmation for important actions.
+7. Save confirmed data.
+8. Answer questions using locally stored information.
+
+### Local-first AI architecture
+
+Implement the assistant in independent layers:
+
+**Layer 1 — Deterministic parser**
+
+Use rules, patterns, date parsing, currency parsing and keyword recognition for common commands.
+
+**Layer 2 — Local intelligence**
+
+Create an adapter for optional on-device language models.
+
+Support integration with a compatible local inference runtime when available. Model availability and device performance must be checked before activation.
+
+**Layer 3 — Optional external providers**
+
+Allow future configuration of OpenAI-compatible APIs and other providers.
+
+External AI must always be optional and disabled by default.
+
+### Critical requirements
+
+- Core commands must work without internet.
+- Do not transmit personal financial information without explicit user permission.
+- Never expose API keys in application code.
+- Store API credentials securely.
+- Clearly distinguish AI-generated suggestions from actual records.
+- Never save ambiguous financial transactions automatically.
+- Provide an editable confirmation preview.
+- Allow users to correct parser mistakes.
+- Maintain an assistant action history.
+
+If local AI is unavailable, the deterministic assistant must continue functioning.
+
+# 12. BENTO INTELLIGENCE & ANALYTICS
+
+Create a personal analytics engine.
+
+This must operate on actual local records.
+
+### Insights
+
+Examples:
+
+"You spent 18% more on shopping than last month."
+
+"You completed 85% of your scheduled habits this week."
+
+"Your savings increased by ₹3,000."
+
+"You have three overdue tasks."
+
+"Your Excel learning goal has not been updated for five days."
+
+### Weekly review
+
+Generate:
+- Tasks completed.
+- Habit consistency.
+- Money spent.
+- Money saved.
+- Learning hours.
+- Goal progress.
+- Important achievements.
+- Areas needing attention.
+
+### Monthly review
+
+Generate:
+- Income and expenses.
+- Savings.
+- Budget performance.
+- Habit performance.
+- Productivity.
+- Learning progress.
+- Goal achievements.
+- Monthly comparisons.
+
+All insights must be explainable and traceable to underlying records.
+
+Never invent data or conclusions.
+
+# 13. BENTO SCORE
+
+Create an optional personal progress scoring system.
+
+Possible dimensions:
+- Financial health.
+- Productivity.
+- Habit consistency.
+- Goal progress.
+- Career and learning.
+- Personal wellbeing.
+
+Use configurable weights.
+
+Important rules:
+- Missing data must not count as zero.
+- Untracked areas must be excluded from the calculation.
+- Avoid punishing users for taking rest days.
+- Never equate financial wealth with personal worth.
+- Display the score methodology.
+- Allow users to disable the score entirely.
+
+Show daily, weekly and monthly trends only when sufficient data exists.
+
+# 14. QUICK ADD — UNIVERSAL CAPTURE
+
+Create one global Quick Add interface accessible from every screen.
+
+Options:
+- Expense.
+- Income.
+- Transfer.
+- Task.
+- Reminder.
+- Habit.
+- Goal.
+- Learning session.
+- Journal entry.
+- Note.
+- Event.
+- Wishlist item.
+
+Also provide a natural language input field.
+
+The user must be able to record something within a few seconds.
+
+# 15. OFFLINE-FIRST & LOCAL DATA ARCHITECTURE
+
+THIS IS A NON-NEGOTIABLE REQUIREMENT.
+
+BENTO must be a genuinely local-first Android application.
+
+### Database
+
+Use SQLite with Drift.
+
+All essential application records must be stored locally.
+
+Create properly normalized tables for:
+
+- Accounts.
+- Transactions.
+- Categories.
+- Budgets.
+- Savings goals.
+- Investments.
+- Debts.
+- Bills.
+- Subscriptions.
+- Tasks.
+- Events.
+- Reminders.
+- Habits.
+- Habit logs.
+- Goals.
+- Milestones.
+- Skills.
+- Courses.
+- Study sessions.
+- Job applications.
+- Journal entries.
+- Memories.
+- Wishlist.
+- Attachments.
+- Dashboard settings.
+- User preferences.
+- Assistant history.
+
+Use:
+- UUID primary keys.
+- Foreign keys.
+- Database indexes.
+- Transactions for multi-record operations.
+- Schema migrations.
+- Created and updated timestamps.
+- Soft deletion where appropriate.
+
+### Offline requirements
+
+The following must work without internet:
+
+- Opening the application.
+- Creating and editing records.
+- Deleting records.
+- Searching.
+- Filtering.
+- Dashboard calculations.
+- Charts.
+- Reports.
+- Reminders and notifications.
+- Natural language deterministic parsing.
+- Data export.
+- Data backup.
+- Viewing previously saved attachments.
+
+Do not make Firebase, Supabase or a remote database mandatory.
+
+### Android storage
+
+Use app-private storage for sensitive information.
+
+Use app-specific file directories for attachments.
+
+Never assume unrestricted filesystem access.
+
+Use Android's Storage Access Framework when users choose to import or export files.
+
+### Backup and restore
+
+Implement a complete backup system.
+
+Support:
+- Full database backup.
+- Attachment backup.
+- ZIP-based backup package.
+- JSON data export.
+- CSV transaction export.
+- Restore from backup.
+- Backup validation.
+- Version compatibility.
+- Duplicate detection.
+- Backup encryption.
+
+Provide optional password-protected backups using established encryption libraries.
+
+The user must be able to move their data to another Android device without depending on a cloud account.
+
+### Optional synchronization
+
+Design an extensible sync interface for future use.
+
+Cloud synchronization must be:
+- Optional.
+- Disabled by default.
+- Explicitly configured.
+- Conflict-aware.
+- Secure.
+
+Do not implement fake synchronization.
+
+# 16. PRIVACY & SECURITY
+
+Privacy is a major selling point.
+
+Implement:
+- No mandatory registration.
+- No mandatory internet.
+- No mandatory analytics SDK.
+- No advertising SDK.
+- No hidden data collection.
+- Optional app lock.
+- PIN protection.
+- Biometric authentication.
+- Secure credential storage.
+- Encrypted backup.
+- Clear permissions.
+- User-controlled data deletion.
+
+Keep financial data inside local app storage by default.
+
+Avoid requesting unnecessary Android permissions.
+
+# 17. NOTIFICATIONS & REMINDERS
+
+Implement local notifications.
+
+Support:
+- Task reminders.
+- Habit reminders.
+- Bill due reminders.
+- EMI reminders.
+- Subscription renewal reminders.
+- Goal deadlines.
+- Custom reminders.
+
+Allow:
+- Notification categories.
+- Quiet hours.
+- Snooze.
+- Dismiss.
+- Mark complete.
+- Reminder frequency.
+
+Handle Android notification permissions and battery/background restrictions correctly.
+
+Do not rely on continuous background execution.
+
+# 18. DESIGN SYSTEM — PREMIUM BENTO UI
+
+The design must feel like a premium, professionally designed product.
+
+Do not create a generic Flutter template.
+
+### Visual direction
+
+Combine:
+- Minimalism.
+- Modern editorial design.
+- Bento grid layouts.
+- Premium finance dashboard aesthetics.
+- Subtle futuristic elements.
+- Excellent typography.
+- Thoughtful spacing.
+- Restrained animations.
+
+### Color system
+
+Default theme: Dark premium.
+
+Suggested palette:
+- Background: Deep charcoal / near-black.
+- Surface: Dark graphite.
+- Primary: Soft emerald.
+- Secondary: Muted violet.
+- Accent: Warm champagne.
+- Text: Off-white.
+- Secondary text: Cool grey.
+
+Also provide:
+- Light theme.
+- System theme.
+- Custom accent color.
+
+### Components
+
+Create reusable components:
+- Bento cards.
+- Balance cards.
+- Transaction rows.
+- Progress indicators.
+- Charts.
+- Bottom sheets.
+- Dialogs.
+- Input fields.
+- Date selectors.
+- Category selectors.
+- Empty states.
+- Loading states.
+- Error states.
+
+### Typography
+
+Use a consistent typography system.
+
+Prioritize readability, spacing and visual hierarchy.
+
+### Interaction
+
+Implement:
+- Smooth transitions.
+- Subtle micro-interactions.
+- Haptic feedback where appropriate.
+- Skeleton loading only when useful.
+- Clear success/error feedback.
+- Accessible touch targets.
+
+Avoid excessive gradients, glassmorphism and animations.
+
+The application must remain responsive on budget Android devices.
+
+# 19. SEARCH & GLOBAL COMMAND CENTER
+
+Build a global search system.
+
+Search across:
+- Transactions.
+- Tasks.
+- Goals.
+- Habits.
+- Notes.
+- Journal.
+- Courses.
+- Skills.
+- Job applications.
+- Memories.
+
+Support filters and recent searches.
+
+Create a command center where the user can quickly navigate or initiate common actions.
+
+# 20. PERFORMANCE REQUIREMENTS
+
+Optimize for real-world Android devices.
+
+Target:
+- Smooth 60 FPS interactions where hardware allows.
+- Fast application startup.
+- Instant local database queries.
+- Efficient list rendering.
+- Paginated transaction history.
+- Indexed search.
+- Minimal memory consumption.
+- No unnecessary background processes.
+- No network requirement for core operations.
+
+Avoid loading the entire database into memory.
+
+Use database aggregation for financial reports.
+
+Ensure the application works on smaller Android screens.
+
+# 21. DATABASE INTEGRITY & BUSINESS RULES
+
+Implement reliable financial calculations.
+
+Important rules:
+
+1. Transfers must not affect income or expenses.
+2. Refunds must be represented consistently.
+3. Account balances must reconcile with transactions.
+4. Editing a transaction must correctly update derived balances.
+5. Deleting a transaction must not leave incorrect totals.
+6. Historical reports must respect the selected date range.
+7. Recurring transactions must not be duplicated.
+8. Time zones must be handled consistently.
+9. Financial amounts must avoid floating-point rounding errors.
+10. Database migrations must preserve user data.
+
+Use integer minor currency units or an appropriate decimal representation for monetary calculations.
+
+All financial operations must be covered by automated tests.
+
+# 22. SETTINGS & PERSONALIZATION
+
+Create comprehensive settings:
+
+- Profile.
+- Currency.
+- Date format.
+- First day of week.
+- Language.
+- Theme.
+- Dashboard customization.
+- Notification settings.
+- Privacy.
+- App lock.
+- Backup and restore.
+- AI configuration.
+- Data management.
+- About BENTO.
+- Version information.
+
+Provide a first-launch onboarding flow that allows users to configure only essential preferences.
+
+Do not force users to enter all personal information before using the app.
+
+# 23. FUTURE-READY ARCHITECTURE
+
+Prepare interfaces for future capabilities without making them dependencies of V1.
+
+Potential future features:
+
+- Optional cloud synchronization.
+- Desktop and web companion.
+- Wear OS companion.
+- Offline voice capture.
+- Local receipt OCR.
+- Local document extraction.
+- Advanced local AI models.
+- Financial account integrations.
+- Calendar integrations.
+- Health platform integrations.
+- Automated recurring workflows.
+- Multi-device synchronization.
+
+Do not implement these as fake buttons or unfinished features presented as working.
+
+# 24. REQUIRED APPLICATION SCREENS
+
+Build the complete V1 screen inventory.
+
+**Onboarding & Core**
+1. Splash screen.
+2. Onboarding.
+3. Initial preferences.
+4. Home dashboard.
+5. Global search.
+6. Quick Add.
+7. BENTO Assistant.
+
+**Money**
+8. Finance overview.
+9. Accounts.
+10. Account details.
+11. Transaction history.
+12. Add/edit transaction.
+13. Categories.
+14. Budgets.
+15. Savings.
+16. Investments.
+17. Debt and credit.
+18. Bills and subscriptions.
+19. Financial analytics.
+
+**Daily**
+20. Daily overview.
+21. Task list.
+22. Task details.
+23. Calendar.
+24. Routines.
+25. Notes.
+
+**Habits & Goals**
+26. Habit overview.
+27. Habit details.
+28. Habit history.
+29. Goals overview.
+30. Goal details.
+31. Milestones.
+
+**Career & Learning**
+32. Career overview.
+33. Skills.
+34. Courses.
+35. Study sessions.
+36. Job applications.
+
+**Life**
+37. Journal.
+38. Memories.
+39. Wishlist.
+40. Health and lifestyle.
+
+**Intelligence & Settings**
+41. Weekly review.
+42. Monthly review.
+43. BENTO Score.
+44. Notification center.
+45. Settings.
+46. Backup and restore.
+47. Privacy and security.
+
+These are screen destinations, not a requirement to show 47 navigation items. Use sensible nested navigation and reusable detail screens.
+
+# 25. TESTING & QUALITY ASSURANCE
+
+Implement:
+
+### Unit tests
+- Financial calculations.
+- Transaction parsing.
+- Budget calculations.
+- Habit streak calculations.
+- Goal progress.
+- Score calculation.
+- Date handling.
+- Recurrence rules.
+
+### Database tests
+- CRUD operations.
+- Relationships.
+- Migrations.
+- Transaction consistency.
+- Backup and restore.
+- Duplicate prevention.
+
+### Widget tests
+- Dashboard.
+- Finance cards.
+- Forms.
+- Navigation.
+- Quick Add.
+- Assistant confirmation.
+
+### Integration tests
+- Create an account.
+- Add income.
+- Add expense.
+- Transfer funds.
+- Create a budget.
+- Create a task.
+- Complete a habit.
+- Create a goal.
+- Generate reports.
+- Export and restore data.
+
+### Offline tests
+
+Run the application with internet connectivity disabled.
+
+Verify that every core module continues working.
+
+# 26. DEVELOPMENT EXECUTION PLAN
+
+Do not attempt to generate the entire application in one untested code dump.
+
+Build the complete application through controlled phases.
+
+**PHASE 1 — Foundation**
+- Flutter project setup.
+- Design system.
+- Navigation.
+- Database.
+- Data models.
+- Repository layer.
+- Theme system.
+- Onboarding.
+
+**PHASE 2 — Core Dashboard**
+- Home.
+- Dashboard customization.
+- Quick Add.
+- Global search.
+
+**PHASE 3 — Finance**
+- Accounts.
+- Transactions.
+- Categories.
+- Budgets.
+- Savings.
+- Analytics.
+
+**PHASE 4 — Daily Life**
+- Tasks.
+- Calendar.
+- Routines.
+- Reminders.
+- Habits.
+
+**PHASE 5 — Goals & Growth**
+- Goals.
+- Milestones.
+- Career.
+- Learning.
+
+**PHASE 6 — Personal Life**
+- Journal.
+- Memories.
+- Wishlist.
+- Health tracking.
+
+**PHASE 7 — Intelligence**
+- Natural language parser.
+- Local assistant.
+- Insights.
+- Weekly/monthly reviews.
+- BENTO Score.
+
+**PHASE 8 — Security & Release**
+- Backup.
+- Restore.
+- Encryption.
+- Offline verification.
+- Performance optimization.
+- Full testing.
+- Android release build.
+
+At the end of every phase:
+- Run formatting.
+- Run static analysis.
+- Run relevant tests.
+- Fix all critical issues.
+- Update documentation.
+- Verify that previously implemented functionality still works.
+
+# 27. FINAL ACCEPTANCE CRITERIA
+
+BENTO V1 is complete only when:
+
+- The Android application builds successfully.
+- All primary modules are functional.
+- All core records persist locally.
+- The application works without internet.
+- Finance calculations are accurate.
+- The assistant can handle common offline commands.
+- The user can edit and delete records.
+- Dashboard values reflect actual data.
+- Local reminders work within Android limitations.
+- Backup and restore work.
+- Database migrations are safe.
+- No major navigation or interaction bugs remain.
+- No placeholder buttons are presented as functional features.
+- No sample data is confused with real user data.
+- The interface is responsive and polished.
+- Automated tests pass.
+
+# 28. INSTRUCTIONS TO THE AI DEVELOPMENT AGENT
+
+Act as a senior Flutter architect, product designer, database engineer and Android application developer.
+
+Before implementation:
+
+1. Inspect the existing repository and development environment.
+2. Identify available SDKs and dependencies.
+3. Establish the application structure.
+4. Create a development roadmap.
+5. Identify architectural risks.
+6. Define database entities and relationships.
+7. Establish design tokens and reusable components.
+
+Then implement the application phase by phase.
+
+Do not:
+- Create a static prototype and call it a complete application.
+- Use fake data for functional screens.
+- Use cloud databases as mandatory dependencies.
+- Make AI APIs mandatory.
+- Leave important buttons nonfunctional.
+- Ignore database consistency.
+- Store sensitive information insecurely.
+- Sacrifice maintainability for speed.
+- Overcomplicate the interface.
+
+Prefer reliable, simple implementations over unnecessary complexity.
+
+Make reasonable technical decisions independently and document important decisions.
+
+When a feature cannot work completely offline, clearly disclose the limitation and provide the best offline alternative.
+
+**FINAL PRODUCT REQUIREMENT**
+
+Deliver a polished, fully functional, privacy-focused Android application called BENTO.
+
+It should feel like a combination of a premium personal finance manager, intelligent daily planner, habit tracker, goal manager and personal knowledge system — all operating as one unified application.
+
+**BENTO is not an app that merely tracks what the user does. It helps the user understand and manage their entire life.**

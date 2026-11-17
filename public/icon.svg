@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <rect width="120" height="120" rx="28" fill="#0F191F"/>
+  <path d="M26 38C26 29.1634 33.1634 22 42 22H58V52H26V38Z" fill="#0E9F8B"/>
+  <text x="42" y="43" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="700" font-family="sans-serif">₹</text>
+  <path d="M62 22H72C84.1503 22 94 31.8497 94 44C94 48.4183 90.4183 52 86 52H62V22Z" fill="#F59E28"/>
+  <circle cx="77" cy="37" r="8" stroke="#FFFFFF" stroke-width="2.2"/>
+  <path d="M73.5 37L76 39.5L81 34.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="26" y="56" width="32" height="26" rx="4" fill="#5D518C"/>
+  <rect x="35" y="62" width="14" height="13" rx="2" stroke="#FFFFFF" stroke-width="2"/>
+  <path d="M35 66.5H49" stroke="#FFFFFF" stroke-width="1.8"/>
+  <path d="M62 56H86C92.6274 56 98 61.3726 98 68V70C98 76.6274 92.6274 82 86 82H62V56Z" fill="#DE4C6B"/>
+  <circle cx="79" cy="69" r="7.5" stroke="#FFFFFF" stroke-width="2"/>
+  <circle cx="79" cy="69" r="2.8" fill="#FFFFFF"/>
+  <rect x="26" y="86" width="66" height="16" rx="8" fill="#2B6B84"/>
+  <rect x="49" y="94" width="4" height="5" rx="1" fill="#FFFFFF"/>
+  <rect x="57" y="91" width="4" height="8" rx="1" fill="#FFFFFF"/>
+  <rect x="65" y="89" width="4" height="10" rx="1" fill="#FFFFFF"/>
+</svg>

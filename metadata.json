@@ -1,0 +1,8 @@
+{
+  "name": "BENTO — Personal Life OS",
+  "description": "Local-first, offline-first personal finance, daily planning, habits, goals, career, learning, and life operating system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
