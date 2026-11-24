@@ -5,8 +5,14 @@ import path from 'path';
 import {defineConfig} from 'vite';
 import {VitePWA} from 'vite-plugin-pwa';
 
+// Deploy under a subpath (GitHub Pages: GH_PAGES_BASE=BENTO-2.0) or at root
+// (local/dev). Read WITHOUT a leading slash so no shell mangles it.
+const rawBase = process.env.GH_PAGES_BASE || '';
+const base = rawBase ? `/${rawBase.replace(/^\/+|\/+$/g, '')}/` : '/';
+
 export default defineConfig(() => {
   return {
+    base,
     plugins: [
       react(),
       tailwindcss(),
