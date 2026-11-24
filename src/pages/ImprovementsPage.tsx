@@ -32,7 +32,6 @@ export const ImprovementsPage: React.FC = () => {
   const [problem, setProblem] = useState('');
   const [need, setNeed] = useState('');
   const [name, setName] = useState('');
-  const [contact, setContact] = useState('');
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState<ImprovementRequest | null>(null);
   const [copied, setCopied] = useState(false);
@@ -65,17 +64,15 @@ export const ImprovementsPage: React.FC = () => {
       need,
       kind,
       name,
-      contact,
       createdAt: new Date().toISOString(),
     }),
-    [title, problem, need, kind, name, contact]
+    [title, problem, need, kind, name]
   );
 
   const resetForm = () => {
     setTitle('');
     setProblem('');
     setNeed('');
-    setContact('');
     setError('');
   };
 
@@ -105,7 +102,6 @@ export const ImprovementsPage: React.FC = () => {
           need: request.need,
           kind: request.kind,
           name: request.name,
-          contact: request.contact,
           createdAt: request.createdAt,
         })
       );
@@ -220,19 +216,6 @@ export const ImprovementsPage: React.FC = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Jitesh"
-                className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-[var(--text-secondary)] mb-1" htmlFor="imp-contact">
-                Contact or GitHub handle (optional)
-              </label>
-              <input
-                id="imp-contact"
-                type="text"
-                value={contact}
-                onChange={(e) => setContact(e.target.value)}
-                placeholder="@username or email"
                 className="w-full rounded-xl bg-[var(--bg-elevated)] border border-[var(--border-hairline)] px-3 py-2 text-sm"
               />
             </div>

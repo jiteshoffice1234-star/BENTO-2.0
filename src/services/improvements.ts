@@ -19,7 +19,6 @@ export interface ImprovementRequest {
   need: string;
   kind: ImprovementKind;
   name: string;
-  contact: string;
   createdAt: string;
   issueUrl: string;
 }
@@ -103,7 +102,6 @@ export function buildIssueBody(
     `**Submitted on:** ${request.createdAt}`,
   ];
   if (request.name.trim()) lines.push(`**Submitted by:** ${request.name.trim()}`);
-  if (request.contact.trim()) lines.push(`**Contact:** ${request.contact.trim()}`);
   lines.push('', '<!-- bento-user-request -->');
   return lines.join('\n');
 }

@@ -20,6 +20,5 @@ ADD NEW THEME LIGHT MODE WHERE I CLICK IN IT EVERY COLOURE FONT EVERYTHING CHANG
 **Submitted from:** BENTO app → Improvements
 **Submitted on:** 2026-11-17T08:57:45.969Z
 **Submitted by:** JITESH
-**Contact:** jiteshsolankiai@gmail.com
 
 <!-- bento-user-request -->
